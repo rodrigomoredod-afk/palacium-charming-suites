@@ -3,6 +3,7 @@ import React from 'react';
 import { ViewType } from '../types';
 import { Mountain, Palette, MapPin, Utensils, Coffee, Car, Handshake, Heart } from 'lucide-react';
 import { NEARBY_LOCATIONS } from '../constants';
+import { experiencesImages } from '../images';
 
 interface ExperiencesProps {
   navigateTo: (view: ViewType) => void;
@@ -12,19 +13,19 @@ const Experiences: React.FC<ExperiencesProps> = ({ navigateTo }) => {
   const partnerships = [
     {
       title: "Arte & Curadoria Local",
-      image: "https://images.unsplash.com/photo-1544967082-d9d25d867d66?q=80&w=1200&auto=format&fit=crop",
+      image: experiencesImages.arte,
       desc: "Colaboramos com o Museu e Centro de Artes para oferecer visitas privadas e acesso exclusivo a exposições de artistas da região.",
       icon: <Palette className="w-4 h-4" />
     },
     {
       title: "Guia das Aldeias do Xisto",
-      image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1200&auto=format&fit=crop",
+      image: experiencesImages.aldeias,
       desc: "Parcerias com guias locais para percursos personalizados pelo Casal de São Simão e as Fragas de São Simão.",
       icon: <Mountain className="w-4 h-4" />
     },
     {
       title: "Gastronomia de Origem",
-      image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop",
+      image: experiencesImages.gastronomia,
       desc: "Uma seleção de produtores locais que garantem a frescura do nosso buffet real e sugerem os melhores segredos do Zêzere.",
       icon: <Utensils className="w-4 h-4" />
     }
@@ -34,7 +35,7 @@ const Experiences: React.FC<ExperiencesProps> = ({ navigateTo }) => {
     <div className="bg-bone min-h-screen">
       <section className="relative h-[60vh] flex items-center justify-center text-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img src="https://images.unsplash.com/photo-1505672678657-cc7037095e60?q=80&w=2400&auto=format&fit=crop" loading="lazy" className="w-full h-full object-cover grayscale opacity-50" />
+          <img src={experiencesImages.sectionHero} loading="lazy" className="w-full h-full object-cover grayscale opacity-50" />
           <div className="absolute inset-0 bg-charcoal/40"></div>
         </div>
         <div className="relative z-10 px-6">

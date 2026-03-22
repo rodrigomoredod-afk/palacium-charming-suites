@@ -1,9 +1,12 @@
 
 import React from 'react';
-import { AMENITIES_GROUPS, GUEST_SCORE } from '../constants';
+import { AMENITIES_GROUPS } from '../constants';
+import { useData } from '../contexts/DataContext';
+import { amenitiesImages } from '../images';
 import { Star, CheckCircle2 } from 'lucide-react';
 
 const Amenities: React.FC = () => {
+  const { bookingDisplayScore } = useData();
   return (
     <section id="amenities" className="py-24 md:py-40 px-6 md:px-16 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto">
@@ -21,7 +24,7 @@ const Amenities: React.FC = () => {
               {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-gold text-gold" />)}
             </div>
             <div className="space-y-1">
-              <span className="text-5xl font-serif text-charcoal">{GUEST_SCORE}</span>
+              <span className="text-5xl font-serif text-charcoal">{bookingDisplayScore}</span>
               <span className="block text-[10px] uppercase tracking-widest font-black text-gold">Excelente</span>
             </div>
             <p className="text-[10px] text-charcoal/40 uppercase tracking-widest font-bold">Booking.com Score</p>
@@ -55,7 +58,7 @@ const Amenities: React.FC = () => {
              {/* Image Section */}
              <div className="relative w-full lg:w-1/2 min-h-[300px] lg:min-h-full order-1 lg:order-2">
                 <img
-                  src="https://palacium.pt/Imgs/L2o20PBZHHX399n4O197jE3IcEgL3jaY/AboutUs/UCjbfaA6a4d9CigrrfnXgqWKATpl3sb7.jpg"
+                  src={amenitiesImages.dietaryHighlight}
                   alt="Área de pequeno-almoço do Palacium"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-[3s] hover:scale-105"
                 />

@@ -4,7 +4,7 @@ import { Star, Globe, ChevronLeft, ChevronRight, CheckCircle2, TrendingUp } from
 import { useData } from '../contexts/DataContext';
 
 const Testimonials: React.FC = () => {
-  const { reviews } = useData();
+  const { reviews, bookingDisplayScore } = useData();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -105,7 +105,7 @@ const Testimonials: React.FC = () => {
           <div className="lg:col-span-7 bg-white/[0.02] border border-white/5 p-8 md:p-12 rounded-sm backdrop-blur-sm scroll-reveal [transition-delay:200ms]">
             <div className="flex flex-col md:flex-row gap-12 items-center">
               <div className="text-center md:border-r border-white/5 md:pr-12 shrink-0">
-                <div className="font-serif text-8xl text-gold leading-none mb-4">9.6</div>
+                <div className="font-serif text-8xl text-gold leading-none mb-4">{bookingDisplayScore}</div>
                 <div className="flex gap-1 justify-center mb-2">
                   {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-gold text-gold" />)}
                 </div>

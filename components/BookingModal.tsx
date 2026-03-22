@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { X, Check, Calendar as CalendarIcon, Users as UsersIcon, ArrowLeft, Baby, Plus, Minus, AlertCircle, Sparkles, Bed, Info, Award, Crown, ChevronDown, CreditCard, Smartphone, Building, Wallet, Lock, ReceiptText, Mail } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
+import { submitReservationRemote } from '../lib/submitReservationRemote';
 import { Suite, InitialBookingData } from '../types';
 
 interface BookingModalProps {
@@ -11,7 +12,7 @@ interface BookingModalProps {
 }
 
 const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialData }) => {
-  const { suites } = useData();
+  const { suites, addReservation } = useData();
   const [step, setStep] = useState(1);
   const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -234,6 +235,23 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialDat
         triggerError("Por favor, introduza um e-mail válido.");
         return;
       }
+      const saved = addReservation({
+        source: 'website',
+        status: 'pending',
+        checkIn,
+        checkOut,
+        guestName: `${billingDetails.firstName} ${billingDetails.lastName}`.trim(),
+        email: billingDetails.email,
+        phone: billingDetails.phone,
+        adults: adultCount,
+        childrenCount: childrenAges.length,
+        suiteIds: [...selectedRoomIds],
+        suiteNames: selectedRooms.map((r) => r.name),
+        nights,
+        totalPrice,
+        nif: billingDetails.nif.trim() || undefined,
+      });
+      void submitReservationRemote(saved);
       setStep(5);
     }
   };

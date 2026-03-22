@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ArrowLeft, History as HistoryIcon, Globe, Leaf, Award } from 'lucide-react';
+import { historyImages } from '../images';
 
 interface HistoryProps {
   navigateTo: (view: 'home' | 'history') => void;
@@ -12,7 +13,7 @@ const History: React.FC<HistoryProps> = ({ navigateTo }) => {
       <section className="relative h-[80vh] flex flex-col justify-end overflow-hidden pt-20">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?q=80&w=2000&auto=format&fit=crop" 
+            src={historyImages.hero} 
             alt="Heritage Detail" 
             loading="lazy"
             className="w-full h-full object-cover grayscale opacity-40"
@@ -45,7 +46,7 @@ const History: React.FC<HistoryProps> = ({ navigateTo }) => {
           
           <div className="lg:col-span-5 space-y-12 scroll-reveal">
             <div className="aspect-[3/4] overflow-hidden rounded-none shadow-2xl bg-charcoal/5">
-              <img src="https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=1000&auto=format&fit=crop" loading="lazy" className="w-full h-full object-cover hover:scale-110 transition-transform duration-[2s]" />
+              <img src={historyImages.stone} loading="lazy" className="w-full h-full object-cover hover:scale-110 transition-transform duration-[2s]" />
             </div>
             <div className="space-y-6">
               <span className="font-serif text-7xl text-gold/20">01.</span>
@@ -60,7 +61,7 @@ const History: React.FC<HistoryProps> = ({ navigateTo }) => {
 
           <div className="lg:col-span-5 space-y-12 lg:mt-40 scroll-reveal">
             <div className="aspect-[3/4] overflow-hidden rounded-none shadow-2xl">
-              <img src="https://images.unsplash.com/photo-1584132967334-10e028bd69f7?q=80&w=1000&auto=format&fit=crop" loading="lazy" className="w-full h-full object-cover hover:scale-110 transition-transform duration-[2s]" />
+              <img src={historyImages.garden} loading="lazy" className="w-full h-full object-cover hover:scale-110 transition-transform duration-[2s]" />
             </div>
             <div className="space-y-6">
               <span className="font-serif text-7xl text-gold/20">02.</span>

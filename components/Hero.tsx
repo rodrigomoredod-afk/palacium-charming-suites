@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, Users, ChevronDown, ImageIcon, Search, ArrowRight, Check } from 'lucide-react';
+import { heroSlideshow } from '../images';
 import { ViewType, InitialBookingData } from '../types';
 
 interface HeroProps {
@@ -8,11 +9,7 @@ interface HeroProps {
   openBooking: (data?: InitialBookingData) => void;
 }
 
-const HERO_IMAGES = [
-  "https://palacium.pt/Imgs/L2o20PBZHHX399n4O197jE3IcEgL3jaY/AboutUs/QWD1bPRF7uZoEiF2dZvFrPCRg8oTtkRj.jpg",
-  "https://palacium.pt/Imgs/L2o20PBZHHX399n4O197jE3IcEgL3jaY/AboutUs/RdlrSSDYtPfNFSYrOBHyYzHKFDetuUIh.jpg",
-  "https://palacium.pt/Imgs/L2o20PBZHHX399n4O197jE3IcEgL3jaY/AboutUs/UowZvIPpaIiPg8gpCerBV3wKeAIINa5s.jpg"
-];
+const HERO_IMAGES = heroSlideshow;
 
 // Standalone component to prevent unmounting issues on state changes
 interface BookingBarContentProps {

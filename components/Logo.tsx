@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { logoImageUrl } from '../images';
 
 interface LogoProps {
   className?: string;
@@ -7,12 +8,8 @@ interface LogoProps {
   showText?: boolean;
 }
 
-/**
- * 💡 NOTA: O link abaixo é o link direto para a sua imagem no Google Drive.
- * Para que a imagem apareça, certifique-se de que o ficheiro no Google Drive 
- * está partilhado como "Qualquer pessoa com o link pode ver".
- */
-const LOGO_IMAGE_URL: string | null = "https://drive.google.com/uc?export=view&id=1U4dR7u1VYs1zuPDu0Pbn8s3O7AZLTAwM"; 
+/** See `images.ts` — Google Drive link must allow “anyone with the link”. */
+const LOGO_IMAGE_URL = logoImageUrl;
 
 const Logo: React.FC<LogoProps> = ({ 
   className = "h-16", 

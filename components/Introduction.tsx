@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { FEATURES } from '../constants';
+import { introductionImages } from '../images';
 
 interface IntroductionProps {
   navigateTo: (view: 'home' | 'history') => void;
@@ -47,7 +48,7 @@ const Introduction: React.FC<IntroductionProps> = ({ navigateTo }) => {
         <div className="relative order-1 lg:order-2">
           <div className="relative z-10 aspect-[4/5] overflow-hidden rounded-sm shadow-2xl scroll-reveal">
             <img 
-              src="https://palacium.pt/Imgs/L2o20PBZHHX399n4O197jE3IcEgL3jaY/AboutUs/raGqhRvMEjXqEQU4dVl94nrY92cf7lha.jpg" 
+              src={introductionImages.heritage} 
               alt="Interiores históricos do Palacium" 
               loading="lazy"
               className="w-full h-full object-cover transition-transform duration-[3s] hover:scale-105"

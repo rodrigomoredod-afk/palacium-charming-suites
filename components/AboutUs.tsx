@@ -1,6 +1,6 @@
 
 import React from 'react';
-// Fix: Import ViewType from types.ts instead of App.tsx
+import { aboutUsImages } from '../images';
 import { ViewType } from '../types';
 import { Coffee, ShieldCheck, Heart } from 'lucide-react';
 
@@ -44,7 +44,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ navigateTo }) => {
           
           <div className="relative scroll-reveal visible [transition-delay:300ms]">
             <div className="aspect-[4/5] rounded-sm overflow-hidden shadow-2xl">
-              <img src="https://images.unsplash.com/photo-1544161515-4ad6ce6f8a4a?q=80&w=1200&auto=format&fit=crop" loading="lazy" className="w-full h-full object-cover" />
+              <img src={aboutUsImages.editorial} loading="lazy" className="w-full h-full object-cover" />
             </div>
             <div className="absolute -bottom-10 -right-10 bg-gold p-12 hidden md:block max-w-xs">
               <p className="text-white text-xl font-serif italic leading-relaxed">"O silêncio do campo com a distinção de um palácio."</p>

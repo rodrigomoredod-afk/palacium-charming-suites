@@ -1,17 +1,27 @@
 
 import React from 'react';
-import { Suite, Review } from './types';
+import { suiteImages } from './images';
+import { Suite, Review, ReservationSource } from './types';
 import { Waves, Coffee, Wifi, Flower2, ShieldCheck, Accessibility, Utensils, MapPin, Tv, Car, Languages } from 'lucide-react';
 
 const Wind = (props: any) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4a2 2 0 1 0-1.4-3.4H2"/></svg>;
 
 export const GUEST_SCORE = 9.6;
 
+export const RESERVATION_SOURCE_LABELS: Record<ReservationSource, string> = {
+  website: 'Site (direto)',
+  phone: 'Telefone',
+  email: 'E-mail',
+  booking_com: 'Booking.com',
+  walk_in: 'Presencial',
+  other: 'Outro',
+};
+
 export const SUITES: Suite[] = [
   {
     id: '101',
     name: 'Suite 101 · Acessibilidade',
-    image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/744008012.jpg?k=7b61432422c01ac3a0281eea8952ec221923582b5f9f27229c76414bc89ded50&o=',
+    image: suiteImages['101'],
     adults: 2,
     area: '24m²',
     description: 'Piso Inferior. Desenhada para acessibilidade universal com WC adaptado e amplos raios de manobra, sem comprometer a elegância 1905.',
@@ -20,7 +30,7 @@ export const SUITES: Suite[] = [
   {
     id: '102',
     name: 'Suite 102 · Régia',
-    image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/743983053.jpg?k=161ed5909f3f4155ac9f3dcf832e2495cf1cabe71ec1fa3597213c2f17551093&o=',
+    image: suiteImages['102'],
     adults: 2,
     area: '22m²',
     description: 'Piso Inferior. Conforto clássico com a robustez da pedra original e vistas para o pátio de entrada.',
@@ -29,7 +39,7 @@ export const SUITES: Suite[] = [
   {
     id: '103',
     name: 'Suite 103 · Régia',
-    image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/743983064.jpg?k=29cf422a5f17157f091def41cbb27ce3e8f98a0fa8f7344aad3d3dcf2347df77&o=',
+    image: suiteImages['103'],
     adults: 2,
     area: '20m²',
     description: 'Piso Inferior. Um refúgio intimista que preserva a alma do edifício centenário com climatização de última geração.',
@@ -38,7 +48,7 @@ export const SUITES: Suite[] = [
   {
     id: '104',
     name: 'Suite 104 · Régia',
-    image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/744509758.jpg?k=fbf448525c4746bfa6b7f4e78c3e5cf8005aa29659e5efd6a47326f9a296ac17&o=',
+    image: suiteImages['104'],
     adults: 2,
     area: '18m²',
     description: 'Piso Inferior. Atmosfera acolhedora e design minimalista focado no descanso absoluto.',
@@ -47,7 +57,7 @@ export const SUITES: Suite[] = [
   {
     id: '201',
     name: 'Suite 201/202 · Familiar',
-    image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/736443472.jpg?k=06d4ab286cc03bfa4284acc559895cf8de933763e7f22f682f9e494a91ef22ad&o=',
+    image: suiteImages['201'],
     adults: 4,
     area: '40m²',
     description: 'Piso Superior. Espaço majestoso desenhado para comitivas ou famílias, oferecendo a máxima amplitude do palácio.',
@@ -56,7 +66,7 @@ export const SUITES: Suite[] = [
   {
     id: '203',
     name: 'Suite 203/204 · Familiar',
-    image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/745177467.jpg?k=7c3ae7e830a7a22cd84070bb7d27fb4c79fd53f192ad52e94134c86d0e0dac05&o=',
+    image: suiteImages['203'],
     adults: 4,
     area: '40m²',
     description: 'Piso Superior. Suite imperial com 40m², onde a luz natural do segundo piso realça a herança arquitetónica.',
@@ -65,7 +75,7 @@ export const SUITES: Suite[] = [
   {
     id: '205',
     name: 'Suite 205 · Deluxe',
-    image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/743983059.jpg?k=858151c95ee7c29434d9bb7edc8e232c64093c97ac1bf610698dbce9f5ca16e3&o=',
+    image: suiteImages['205'],
     adults: 2,
     area: '24m²',
     description: 'Piso Superior. Vista privilegiada e design sofisticado com zona de estar integrada e acabamentos premium.',
@@ -74,7 +84,7 @@ export const SUITES: Suite[] = [
   {
     id: '206',
     name: 'Suite 206 · Deluxe',
-    image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/743983049.jpg?k=e4e2ac0e326008d0de124a2e446e153ebf10173abf361ce5217e26d71b688d8f&o=',
+    image: suiteImages['206'],
     adults: 2,
     area: '28m²',
     description: 'Piso Superior. O expoente da elegância Deluxe, oferecendo uma área de 28m² banhada por luz natural.',
