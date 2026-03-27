@@ -80,3 +80,22 @@ export interface FeatureIcon {
   label: string;
   icon: React.ReactNode;
 }
+
+export interface SuiteDetailSpec {
+  label: string;
+  value: string;
+}
+
+export interface SuiteDetailContent {
+  idealFor: string;
+  included: string[];
+  specs: SuiteDetailSpec[];
+  policies: string[];
+}
+
+export interface SuiteDetailEntry {
+  suiteId: string;
+  pt: SuiteDetailContent;
+  en: SuiteDetailContent;
+  gallery: string[];
+}

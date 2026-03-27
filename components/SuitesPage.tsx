@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useData } from '../contexts/DataContext';
-import { ViewType } from '../types';
+import { Suite, ViewType } from '../types';
 import { Users, Maximize, ArrowLeft } from 'lucide-react';
 import { useLocale } from '../contexts/LocaleContext';
+import SuiteDetailsDrawer from './SuiteDetailsDrawer';
 
 interface SuitesPageProps {
   navigateTo: (view: ViewType) => void;
@@ -13,6 +14,8 @@ interface SuitesPageProps {
 const SuitesPage: React.FC<SuitesPageProps> = ({ navigateTo, openBooking }) => {
   const { suites } = useData();
   const { locale } = useLocale();
+  const [selectedSuite, setSelectedSuite] = useState<Suite | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const suiteDescriptionEn: Record<string, string> = {
     '101': 'Ground floor. Designed for universal accessibility with adapted bathroom layout and generous circulation space, while preserving the 1905 elegance.',
@@ -23,6 +26,15 @@ const SuitesPage: React.FC<SuitesPageProps> = ({ navigateTo, openBooking }) => {
     '203': 'Upper floor. Imperial 40m² suite where natural light highlights architectural heritage.',
     '205': 'Upper floor. Privileged views and refined design with integrated lounge area and premium finishes.',
     '206': 'Upper floor. The pinnacle of Deluxe elegance, with 28m² bathed in natural light.',
+  };
+
+  const openSuiteDetails = (suite: Suite) => {
+    setSelectedSuite(suite);
+    setIsDetailsOpen(true);
+  };
+
+  const closeSuiteDetails = () => {
+    setIsDetailsOpen(false);
   };
 
   return (
@@ -80,7 +92,11 @@ const SuitesPage: React.FC<SuitesPageProps> = ({ navigateTo, openBooking }) => {
                   >
                     {locale === 'pt' ? 'Reservar Agora' : 'Book Now'}
                   </button>
-                  <button className="w-full sm:w-auto border border-charcoal/20 text-charcoal px-10 py-4 uppercase text-[10px] tracking-[0.2em] md:tracking-[0.3em] font-bold hover:bg-charcoal hover:text-white rounded-none transition-all">
+                  <button
+                    type="button"
+                    onClick={() => openSuiteDetails(suite)}
+                    className="w-full sm:w-auto border border-charcoal/20 text-charcoal px-10 py-4 uppercase text-[10px] tracking-[0.2em] md:tracking-[0.3em] font-bold hover:bg-charcoal hover:text-white rounded-none transition-all"
+                  >
                     {locale === 'pt' ? 'Detalhes da Suíte' : 'Suite Details'}
                   </button>
                 </div>
@@ -89,6 +105,16 @@ const SuitesPage: React.FC<SuitesPageProps> = ({ navigateTo, openBooking }) => {
           ))}
         </div>
       </div>
+      <SuiteDetailsDrawer
+        suite={selectedSuite}
+        locale={locale}
+        isOpen={isDetailsOpen}
+        onClose={closeSuiteDetails}
+        onBook={() => {
+          closeSuiteDetails();
+          openBooking();
+        }}
+      />
     </div>
   );
 };
