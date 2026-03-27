@@ -8,6 +8,7 @@ This folder is the human-friendly source of truth for business, operations, and 
 - `docs/sales/` - proposals, pricing notes, and client message templates.
 - `docs/ops/` - environment setup, deployment notes, and security decisions.
 - `docs/runbooks/` - step-by-step procedures for common tasks.
+- `docs/ops/images-and-local-seo.md` - image optimization and local discovery guidance.
 
 ## Editing Rules
 
