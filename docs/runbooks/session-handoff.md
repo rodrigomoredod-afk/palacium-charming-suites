@@ -2,6 +2,12 @@
 
 Last updated: 2026-03-26
 
+## Latest Sync Status
+
+- Git sync: changes committed and pushed to `origin/main`
+- Commit: `22ba30c` — "Finalize PT/EN localization polish and fix SmartImage typing"
+- Dev server note from this session: Vite was running on `http://localhost:3001/` (port 3000 was busy)
+
 ## Current Project Phase
 
 - Phase: Design Sprint
