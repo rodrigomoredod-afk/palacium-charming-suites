@@ -40,7 +40,7 @@ const Gallery: React.FC<GalleryProps> = ({ navigateTo }) => {
         </div>
         
         <div className="mt-20 text-center">
-           <p className="text-charcoal/30 text-[10px] uppercase tracking-[0.3em] font-bold">{locale === 'pt' ? 'A essência de Figueiró dos Vinhos' : 'The essence of Figueiro dos Vinhos'}</p>
+           <p className="text-charcoal/30 text-[10px] uppercase tracking-[0.3em] font-bold">{locale === 'pt' ? 'A essência de Figueiró dos Vinhos' : 'The essence of Figueiró dos Vinhos'}</p>
         </div>
       </div>
     </div>

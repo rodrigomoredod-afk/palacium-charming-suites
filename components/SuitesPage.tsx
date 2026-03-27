@@ -32,15 +32,15 @@ const SuitesPage: React.FC<SuitesPageProps> = ({ navigateTo, openBooking }) => {
           onClick={() => navigateTo('home')}
           className="flex items-center gap-2 text-gold text-[10px] uppercase tracking-[0.4em] font-bold mb-12 hover:-translate-x-2 transition-transform"
         >
-          <ArrowLeft className="w-4 h-4" /> {locale === 'pt' ? 'Inicio' : 'Home'}
+          <ArrowLeft className="w-4 h-4" /> {locale === 'pt' ? 'Início' : 'Home'}
         </button>
 
         <div className="mb-20 scroll-reveal visible">
-          <span className="text-gold uppercase tracking-[0.35em] md:tracking-[0.5em] text-xs font-semibold block mb-6">{locale === 'pt' ? 'Acomodacoes' : 'Accommodations'}</span>
+          <span className="text-gold uppercase tracking-[0.35em] md:tracking-[0.5em] text-xs font-semibold block mb-6">{locale === 'pt' ? 'Acomodações' : 'Accommodations'}</span>
           <h1 className="font-serif text-5xl md:text-8xl text-charcoal leading-tight">Royal <span className="italic font-light">Suites</span></h1>
           <p className="text-charcoal/60 text-lg md:text-xl font-light mt-8 max-w-2xl">
             {locale === 'pt'
-              ? 'Cada quarto no Palacium foi desenhado para ser um santuario de tranquilidade, fundindo o esplendor do seculo XX com as comodidades do seculo XXI.'
+              ? 'Cada quarto no Palacium foi desenhado para ser um santuário de tranquilidade, fundindo o esplendor do século XX com as comodidades do século XXI.'
               : 'Each suite at Palacium is designed as a sanctuary of calm, blending early-20th-century elegance with modern comfort.'}
           </p>
         </div>
@@ -81,7 +81,7 @@ const SuitesPage: React.FC<SuitesPageProps> = ({ navigateTo, openBooking }) => {
                     {locale === 'pt' ? 'Reservar Agora' : 'Book Now'}
                   </button>
                   <button className="w-full sm:w-auto border border-charcoal/20 text-charcoal px-10 py-4 uppercase text-[10px] tracking-[0.2em] md:tracking-[0.3em] font-bold hover:bg-charcoal hover:text-white rounded-none transition-all">
-                    {locale === 'pt' ? 'Detalhes da Suite' : 'Suite Details'}
+                    {locale === 'pt' ? 'Detalhes da Suíte' : 'Suite Details'}
                   </button>
                 </div>
               </div>

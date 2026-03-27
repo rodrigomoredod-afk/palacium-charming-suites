@@ -128,7 +128,7 @@ const Testimonials: React.FC = () => {
             </h2>
             <p className="text-white/40 text-sm md:text-lg font-light leading-relaxed max-w-md">
               {locale === 'pt'
-                ? 'A nossa reputacao e construida sobre a satisfacao absoluta de quem nos visita. Cada estadia e uma promessa de excelencia cumprida.'
+                ? 'A nossa reputação é construída sobre a satisfação absoluta de quem nos visita. Cada estadia é uma promessa de excelência cumprida.'
                 : 'Our reputation is built on guest satisfaction. Every stay is a promise of excellence delivered.'}
             </p>
           </div>
@@ -176,7 +176,7 @@ const Testimonials: React.FC = () => {
           <button 
             onClick={() => navigate('next')}
             className={`absolute right-12 top-1/2 -translate-y-1/2 z-50 p-6 transition-all duration-500 border rounded-full bg-charcoal/40 backdrop-blur-xl ${canScrollRight ? 'border-gold/40 text-gold hover:border-gold hover:bg-gold hover:text-white translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none'}`}
-            aria-label={locale === 'pt' ? 'Proximo' : 'Next'}
+            aria-label={locale === 'pt' ? 'Próximo' : 'Next'}
           >
             <ChevronRight className="w-8 h-8 stroke-[1px]" />
           </button>
@@ -240,7 +240,7 @@ const Testimonials: React.FC = () => {
                            <Globe className={`w-3 h-3 transition-colors duration-700 ${isActive ? 'text-gold/50' : 'text-white/5'}`} />
                            <span className={`text-[9px] uppercase tracking-[0.3em] font-bold transition-colors duration-700 ${isActive ? 'text-white/40' : 'text-white/5'}`}>
                             {locale === 'pt'
-                              ? (review.nationality || 'Hospede')
+                              ? (review.nationality || 'Hóspede')
                               : (nationalityEn[review.nationality || ''] || review.nationality || 'Guest')}
                            </span>
                         </div>

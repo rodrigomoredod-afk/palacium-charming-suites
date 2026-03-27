@@ -21,7 +21,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ navigateTo }) => {
             <h1 className="font-serif text-5xl md:text-7xl text-charcoal leading-tight">{locale === 'pt' ? 'Onde a Nobreza é' : 'Where Nobility is'} <span className="italic font-light">{locale === 'pt' ? 'Hospitalidade.' : 'Hospitality.'}</span></h1>
             
             <div className="mt-10 md:mt-12 space-y-6 text-charcoal/70 text-lg font-light leading-relaxed max-w-2xl">
-              <p>{locale === 'pt' ? 'Recuperado de um antigo edifício de 1905 em Figueiró dos Vinhos, o Palacium Charming Suites guarda, em cada recanto, histórias de um tempo em que acolher era a mais nobre das virtudes.' : 'Restored from a 1905 building in Figueiro dos Vinhos, Palacium Charming Suites preserves stories from a time when welcoming guests was a noble art.'}</p>
+              <p>{locale === 'pt' ? 'Recuperado de um antigo edifício de 1905 em Figueiró dos Vinhos, o Palacium Charming Suites guarda, em cada recanto, histórias de um tempo em que acolher era a mais nobre das virtudes.' : 'Restored from a 1905 building in Figueiró dos Vinhos, Palacium Charming Suites preserves stories from a time when welcoming guests was a noble art.'}</p>
               <p>{locale === 'pt' ? 'Aqui, a modernidade coexiste com a traça original. Oferecemos oito suítes exclusivas com camas super king-size, incluindo uma unidade adaptada para mobilidade condicionada, garantindo que o descanso régio seja acessível a todos.' : 'Here, modern comfort coexists with original architecture. We offer eight exclusive suites, including one adapted unit for accessibility.'}</p>
               <p>{locale === 'pt' ? 'A nossa filosofia baseia-se na autonomia e no conforto: da cozinha de apoio equipada ao serviço completo de lavandaria, cada detalhe foi pensado para que se sinta o mestre da sua própria estadia no palácio.' : 'Our philosophy is autonomy and comfort: from support kitchen facilities to full laundry services, every detail is designed to make your stay effortless.'}</p>
             </div>
@@ -50,7 +50,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ navigateTo }) => {
               <SmartImage src={aboutUsImages.editorial} loading="lazy" className="transition-transform duration-[2s] hover:scale-105" overlay />
             </div>
             <div className="absolute -bottom-10 -right-10 bg-gold p-12 hidden md:block max-w-xs">
-              <p className="text-white text-xl font-serif italic leading-relaxed">"{locale === 'pt' ? 'O silencio do campo com a distincao de um palacio.' : 'The silence of the countryside with palace distinction.'}"</p>
+              <p className="text-white text-xl font-serif italic leading-relaxed">"{locale === 'pt' ? 'O silêncio do campo com a distinção de um palácio.' : 'The silence of the countryside with palace distinction.'}"</p>
             </div>
           </div>
         </div>

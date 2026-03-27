@@ -47,12 +47,12 @@ const Header: React.FC<HeaderProps> = ({ scrolled, navigateTo, currentView, open
   const isHeaderDark = scrolled || isMenuOpen || !isTransparentView;
 
   const navLinks: { label: string; view: ViewType }[] = [
-    { label: locale === 'pt' ? 'Inicio' : 'Home', view: 'home' },
-    { label: locale === 'pt' ? 'Historia' : 'History', view: 'history' },
+    { label: locale === 'pt' ? 'Início' : 'Home', view: 'home' },
+    { label: locale === 'pt' ? 'História' : 'History', view: 'history' },
     { label: 'Suites', view: 'suites' },
     { label: locale === 'pt' ? 'Parceiros' : 'Partners', view: 'experiences' },
     { label: locale === 'pt' ? 'Galeria' : 'Gallery', view: 'gallery' },
-    { label: locale === 'pt' ? 'Sobre Nos' : 'About Us', view: 'about' },
+    { label: locale === 'pt' ? 'Sobre Nós' : 'About Us', view: 'about' },
   ];
 
   return (

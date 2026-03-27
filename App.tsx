@@ -104,7 +104,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen selection:bg-gold/30 flex flex-col">
       <a href="#main-content" className="skip-link">
-        {locale === 'pt' ? 'Pular para o conteudo principal' : 'Skip to main content'}
+        {locale === 'pt' ? 'Pular para o conteúdo principal' : 'Skip to main content'}
       </a>
       {/* Hide Header on Admin Page */}
       {view !== 'admin' && (

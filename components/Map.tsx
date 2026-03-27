@@ -171,29 +171,29 @@ const Map: React.FC = () => {
        <div className="absolute top-0 left-0 w-full h-full z-0" ref={mapContainerRef}></div>
        
        {/* Overlay Content */}
-       <div className="absolute top-10 left-6 md:left-16 z-[1000] bg-white/90 backdrop-blur-md p-8 max-w-sm rounded-sm shadow-xl border border-white/20">
+       <div className="absolute top-10 left-6 md:left-16 z-[90] bg-white/90 backdrop-blur-md p-8 max-w-sm rounded-sm shadow-xl border border-white/20">
           <div className="flex items-start gap-4 mb-6">
             <div className="p-3 bg-gold text-white rounded-full shrink-0">
                <Navigation className="w-6 h-6" />
             </div>
             <div>
                <span className="text-gold uppercase tracking-[0.3em] text-[10px] font-bold block mb-2">
-                 {locale === 'pt' ? 'Localizacao' : 'Location'}
+                 {locale === 'pt' ? 'Localização' : 'Location'}
                </span>
                <h3 className="font-serif text-2xl text-charcoal">
-                 {locale === 'pt' ? 'No Coracao de' : 'In the Heart of'} <br/><span className="italic">Figueiro.</span>
+                 {locale === 'pt' ? 'No Coração de' : 'In the Heart of'} <br/><span className="italic">Figueiró.</span>
                </h3>
             </div>
           </div>
           <p className="text-charcoal/60 text-sm leading-relaxed mb-6">
              {locale === 'pt'
-               ? 'Estrategicamente posicionado para explorar as Aldeias do Xisto e as praias fluviais do Zezere, com a melhor gastronomia a poucos passos.'
+               ? 'Estrategicamente posicionado para explorar as Aldeias do Xisto e as praias fluviais do Zêzere, com a melhor gastronomia a poucos passos.'
                : 'Strategically positioned to explore the Schist Villages and the Zezere river beaches, with top local gastronomy just steps away.'}
           </p>
           <div className="space-y-3">
              <div className="flex items-center gap-3">
                 <MapPin className="w-4 h-4 text-gold" />
-                <span className="text-xs font-bold text-charcoal">R. Teofilo Braga 85, Figueiro dos Vinhos</span>
+                <span className="text-xs font-bold text-charcoal">R. Teófilo Braga 85, Figueiró dos Vinhos</span>
              </div>
              <div className="flex items-center gap-3">
                 <div className="w-4 h-4 rounded-full bg-charcoal"></div>

@@ -319,7 +319,7 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
           }}
         >
           <span className="inline-block text-gold uppercase tracking-[0.35em] md:tracking-[0.5em] text-[10px] md:text-xs font-bold animate-fade-up [animation-delay:200ms]">
-            {locale === 'pt' ? 'Experiencia Singular' : 'Singular Experience'}
+            {locale === 'pt' ? 'Experiência Singular' : 'Singular Experience'}
           </span>
           
           <div className="space-y-4 md:space-y-6 overflow-hidden">
@@ -328,8 +328,8 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
             </h1>
             <p className="text-white/70 text-xs md:text-xl font-light max-w-2xl mx-auto animate-fade-up [animation-delay:600ms] px-6 tracking-wide">
               {locale === 'pt'
-                ? 'Descubra o encanto de um retiro exclusivo no coracao de Figueiro dos Vinhos.'
-                : 'Discover the charm of an exclusive retreat in the heart of Figueiro dos Vinhos.'}
+                ? 'Descubra o encanto de um retiro exclusivo no coração de Figueiró dos Vinhos.'
+                : 'Discover the charm of an exclusive retreat in the heart of Figueiró dos Vinhos.'}
             </p>
           </div>
           
@@ -374,7 +374,7 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
             />
           </div>
           <p className="mt-4 text-[9px] uppercase tracking-[0.4em] text-white/20 font-black hidden md:block">
-            {locale === 'pt' ? 'Melhor Tarifa Garantida · Cancelamento Flexivel' : 'Best Rate Guaranteed · Flexible Cancellation'}
+            {locale === 'pt' ? 'Melhor Tarifa Garantida · Cancelamento Flexível' : 'Best Rate Guaranteed · Flexible Cancellation'}
           </p>
         </div>
 

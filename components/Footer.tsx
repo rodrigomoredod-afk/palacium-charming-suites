@@ -24,7 +24,7 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
           <p className="text-sm leading-relaxed text-white/50">
             {locale === 'pt'
               ? 'Um refúgio de luxo onde a história portuguesa é celebrada em cada detalhe. O seu retiro exclusivo no coração de Figueiró dos Vinhos.'
-              : 'A luxury retreat where Portuguese heritage is celebrated in every detail, in the heart of Figueiro dos Vinhos.'}
+              : 'A luxury retreat where Portuguese heritage is celebrated in every detail, in the heart of Figueiró dos Vinhos.'}
           </p>
           <div className="flex gap-4">
             <a href="#" className="hover:text-gold transition-colors" aria-label="Instagram"><Instagram className="w-5 h-5" /></a>
@@ -35,9 +35,9 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
         <div className="space-y-6">
           <h3 className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">{locale === 'pt' ? 'Navegação' : 'Navigation'}</h3>
           <ul className="space-y-4 text-sm">
-            <li><button onClick={() => navigateTo('history')} className="hover:text-white transition-colors">{locale === 'pt' ? 'Historia' : 'History'}</button></li>
+            <li><button onClick={() => navigateTo('history')} className="hover:text-white transition-colors">{locale === 'pt' ? 'História' : 'History'}</button></li>
             <li><button onClick={() => navigateTo('about')} className="hover:text-white transition-colors">{locale === 'pt' ? 'Sobre Nós' : 'About Us'}</button></li>
-            <li><button onClick={() => navigateTo('suites')} className="hover:text-white transition-colors">Royal Suites</button></li>
+            <li><button onClick={() => navigateTo('suites')} className="hover:text-white transition-colors">{locale === 'pt' ? 'Suites Reais' : 'Royal Suites'}</button></li>
             <li><button onClick={() => navigateTo('experiences')} className="hover:text-white transition-colors">{locale === 'pt' ? 'Parceiros' : 'Partners'}</button></li>
             <li><button onClick={() => navigateTo('gallery')} className="hover:text-white transition-colors">{locale === 'pt' ? 'Galeria' : 'Gallery'}</button></li>
           </ul>
@@ -52,7 +52,7 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
                 <a href="tel:+351965795859" className="hover:text-white transition-colors font-medium">+351 965 795 859</a>
               </div>
               <span className="text-[9px] text-white/30 ml-7 leading-none uppercase tracking-tighter">
-                {locale === 'pt' ? '(chamada para a rede movel nacional)' : '(call to national mobile network)'}
+                {locale === 'pt' ? '(chamada para a rede móvel nacional)' : '(call to national mobile network)'}
               </span>
             </li>
             <li className="flex flex-col gap-2">
@@ -76,7 +76,7 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
         </div>
 
         <div className="space-y-6">
-          <h3 className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">{locale === 'pt' ? 'Informacao Legal' : 'Legal Information'}</h3>
+          <h3 className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">{locale === 'pt' ? 'Informação Legal' : 'Legal Information'}</h3>
           <div className="space-y-6 flex flex-col items-start">
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/40 font-bold">
@@ -98,7 +98,7 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="group flex items-center gap-4 hover:bg-white/5 p-2 -ml-2 rounded-sm transition-colors"
-                aria-label={locale === 'pt' ? 'Aceder ao Livro de Reclamacoes Eletronico' : 'Open Electronic Complaints Book'}
+                aria-label={locale === 'pt' ? 'Aceder ao Livro de Reclamações Eletrónico' : 'Open Electronic Complaints Book'}
               >
                 <div className="shrink-0">
                   <svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-60 group-hover:opacity-100 transition-opacity">
@@ -113,7 +113,7 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[8px] uppercase tracking-[0.2em] font-bold text-white group-hover:text-gold transition-colors">{locale === 'pt' ? 'Livro de' : 'Complaints'}</span>
-                  <span className="text-[8px] uppercase tracking-[0.2em] font-bold text-white group-hover:text-gold transition-colors">{locale === 'pt' ? 'Reclamacoes' : 'Book'}</span>
+                  <span className="text-[8px] uppercase tracking-[0.2em] font-bold text-white group-hover:text-gold transition-colors">{locale === 'pt' ? 'Reclamações' : 'Book'}</span>
                 </div>
               </a>
               
@@ -130,10 +130,10 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
           © 2024 Palacium Charming Suites. {locale === 'pt' ? 'Todos os direitos reservados.' : 'All rights reserved.'}
         </p>
         <div className="flex flex-wrap justify-center items-center gap-8 text-[10px] uppercase tracking-widest text-white/30">
-          <a href="#" className="hover:text-white transition-colors">{locale === 'pt' ? 'Politica de Privacidade' : 'Privacy Policy'}</a>
-          <a href="#" className="hover:text-white transition-colors">{locale === 'pt' ? 'Termos e Condicoes' : 'Terms and Conditions'}</a>
+          <a href="#" className="hover:text-white transition-colors">{locale === 'pt' ? 'Política de Privacidade' : 'Privacy Policy'}</a>
+          <a href="#" className="hover:text-white transition-colors">{locale === 'pt' ? 'Termos e Condições' : 'Terms and Conditions'}</a>
           <button onClick={() => navigateTo('admin')} className="hover:text-gold transition-colors flex items-center gap-1 group">
-             <Lock className="w-3 h-3 group-hover:text-gold" /> {locale === 'pt' ? 'Area Reservada' : 'Restricted Area'}
+             <Lock className="w-3 h-3 group-hover:text-gold" /> {locale === 'pt' ? 'Área Reservada' : 'Restricted Area'}
           </button>
         </div>
       </div>

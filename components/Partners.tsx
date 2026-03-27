@@ -7,22 +7,22 @@ const Partners: React.FC = () => {
   const { locale } = useLocale();
   const placeholders = [
     {
-      name: locale === 'pt' ? 'Parceiro de Excelencia I' : 'Excellence Partner I',
+      name: locale === 'pt' ? 'Parceiro de Excelência I' : 'Excellence Partner I',
       category: locale === 'pt' ? 'Gastronomia Local' : 'Local Gastronomy',
       icon: <Award className="w-5 h-5" />,
     },
     {
-      name: locale === 'pt' ? 'Parceiro de Excelencia II' : 'Excellence Partner II',
-      category: locale === 'pt' ? 'Experiencias & Lazer' : 'Experiences & Leisure',
+      name: locale === 'pt' ? 'Parceiro de Excelência II' : 'Excellence Partner II',
+      category: locale === 'pt' ? 'Experiências & Lazer' : 'Experiences & Leisure',
       icon: <Sparkles className="w-5 h-5" />,
     },
     {
-      name: locale === 'pt' ? 'Parceiro de Excelencia III' : 'Excellence Partner III',
+      name: locale === 'pt' ? 'Parceiro de Excelência III' : 'Excellence Partner III',
       category: locale === 'pt' ? 'Bem-Estar & Spa' : 'Wellness & Spa',
       icon: <ShieldCheck className="w-5 h-5" />,
     },
     {
-      name: locale === 'pt' ? 'Parceiro de Excelencia IV' : 'Excellence Partner IV',
+      name: locale === 'pt' ? 'Parceiro de Excelência IV' : 'Excellence Partner IV',
       category: locale === 'pt' ? 'Artes & Cultura' : 'Arts & Culture',
       icon: <Globe className="w-5 h-5" />,
     },
@@ -32,9 +32,9 @@ const Partners: React.FC = () => {
     <section id="partners" className="py-24 md:py-40 px-6 md:px-16 bg-white overflow-hidden border-t border-charcoal/5">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-20 md:mb-32 scroll-reveal">
-          <span className="text-gold uppercase tracking-[0.4em] text-[10px] font-bold block mb-4">{locale === 'pt' ? 'Colaboracoes' : 'Collaborations'}</span>
+          <span className="text-gold uppercase tracking-[0.4em] text-[10px] font-bold block mb-4">{locale === 'pt' ? 'Colaborações' : 'Collaborations'}</span>
           <h2 className="font-serif text-4xl md:text-6xl text-charcoal leading-tight">
-            {locale === 'pt' ? 'Parceiros &' : 'Partners &'} <span className="italic font-light">{locale === 'pt' ? 'Aliancas.' : 'Alliances.'}</span>
+            {locale === 'pt' ? 'Parceiros &' : 'Partners &'} <span className="italic font-light">{locale === 'pt' ? 'Alianças.' : 'Alliances.'}</span>
           </h2>
           <div className="w-12 h-[1px] bg-gold/30 mx-auto mt-8"></div>
         </div>

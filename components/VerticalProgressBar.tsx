@@ -15,10 +15,10 @@ const VerticalProgressBar: React.FC = () => {
 
   const sections: Section[] = useMemo(() => [
     { id: 'hero', title: locale === 'pt' ? 'Bem-Vindo' : 'Welcome' },
-    { id: 'heritage', title: locale === 'pt' ? 'Nossa Historia' : 'Our Story' },
+    { id: 'heritage', title: locale === 'pt' ? 'Nossa História' : 'Our Story' },
     { id: 'suites', title: locale === 'pt' ? 'Suites Reais' : 'Royal Suites' },
-    { id: 'reviews', title: locale === 'pt' ? 'Criticas' : 'Reviews' },
-    { id: 'cta', title: locale === 'pt' ? 'Reserve Ja' : 'Book Now' }
+    { id: 'reviews', title: locale === 'pt' ? 'Críticas' : 'Reviews' },
+    { id: 'cta', title: locale === 'pt' ? 'Reserve Já' : 'Book Now' }
   ], [locale]);
 
   const updateScroll = () => {

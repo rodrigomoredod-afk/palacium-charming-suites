@@ -15,10 +15,10 @@ const History: React.FC<HistoryProps> = ({ navigateTo }) => {
   const pillars = [
     {
       icon: <HistoryIcon className="w-full h-full" />,
-      title: locale === 'pt' ? 'Heranca' : 'Heritage',
+      title: locale === 'pt' ? 'Herança' : 'Heritage',
       desc:
         locale === 'pt'
-          ? 'Preservacao rigorosa da pedra e traca original de 1905.'
+          ? 'Preservação rigorosa da pedra e traça original de 1905.'
           : 'Rigorous preservation of original 1905 stonework and lines.',
     },
     {
@@ -26,7 +26,7 @@ const History: React.FC<HistoryProps> = ({ navigateTo }) => {
       title: locale === 'pt' ? 'Natureza' : 'Nature',
       desc:
         locale === 'pt'
-          ? 'O olival centenario como guardiao do nosso jardim.'
+          ? 'O olival centenário como guardião do nosso jardim.'
           : 'Centenary olive trees as guardians of the estate.',
     },
     {
@@ -34,7 +34,7 @@ const History: React.FC<HistoryProps> = ({ navigateTo }) => {
       title: locale === 'pt' ? 'Cultura' : 'Culture',
       desc:
         locale === 'pt'
-          ? 'Hospitalidade que celebra as raizes de Figueiro.'
+          ? 'Hospitalidade que celebra as raízes de Figueiró.'
           : 'Hospitality that reflects local roots and identity.',
     },
     {
@@ -42,7 +42,7 @@ const History: React.FC<HistoryProps> = ({ navigateTo }) => {
       title: locale === 'pt' ? 'Exclusividade' : 'Exclusivity',
       desc:
         locale === 'pt'
-          ? 'Privacidade e conforto absoluto no nosso refugio.'
+          ? 'Privacidade e conforto absoluto no nosso refúgio.'
           : 'Privacy and premium comfort in our retreat.',
     },
   ];
@@ -66,17 +66,17 @@ const History: React.FC<HistoryProps> = ({ navigateTo }) => {
             onClick={() => navigateTo('home')}
             className="flex items-center gap-2 text-gold text-[10px] uppercase tracking-[0.4em] font-bold mb-12 hover:-translate-x-2 transition-transform"
           >
-            <ArrowLeft className="w-4 h-4" /> {locale === 'pt' ? 'Voltar ao Inicio' : 'Back to Home'}
+            <ArrowLeft className="w-4 h-4" /> {locale === 'pt' ? 'Voltar ao Início' : 'Back to Home'}
           </button>
           
           <div className="max-w-4xl scroll-reveal visible">
-            <span className="text-gold uppercase tracking-[0.35em] md:tracking-[0.5em] text-xs font-semibold block mb-6">{locale === 'pt' ? 'A Nossa Historia' : 'Our Story'}</span>
+            <span className="text-gold uppercase tracking-[0.35em] md:tracking-[0.5em] text-xs font-semibold block mb-6">{locale === 'pt' ? 'A Nossa História' : 'Our Story'}</span>
             <h1 className="font-serif text-5xl md:text-9xl text-charcoal leading-[0.9] mb-8">
-              {locale === 'pt' ? 'Heranca' : 'Enduring'} <br /> <span className="italic font-light">{locale === 'pt' ? 'Eterna.' : 'Legacy.'}</span>
+              {locale === 'pt' ? 'Herança' : 'Enduring'} <br /> <span className="italic font-light">{locale === 'pt' ? 'Eterna.' : 'Legacy.'}</span>
             </h1>
             <p className="text-xl md:text-2xl text-charcoal/70 font-light leading-relaxed max-w-2xl">
               {locale === 'pt'
-                ? 'Da robustez da pedra de 1905 a transparencia da piscina moderna: um dialogo entre geracoes.'
+                ? 'Da robustez da pedra de 1905 à transparência da piscina moderna: um diálogo entre gerações.'
                 : 'From 1905 stone strength to modern glass openness: a dialogue across generations.'}
             </p>
           </div>
@@ -95,7 +95,7 @@ const History: React.FC<HistoryProps> = ({ navigateTo }) => {
               <h2 className="font-serif text-4xl text-charcoal">{locale === 'pt' ? 'A Pedra e o Tempo' : 'Stone and Time'}</h2>
               <p className="text-charcoal/60 leading-relaxed font-light text-lg">
                 {locale === 'pt'
-                  ? 'As escadarias monumentais em pedra, agora restauradas, serviram outrora de palco para as familias mais ilustres da regiao.'
+                  ? 'As escadarias monumentais em pedra, agora restauradas, serviram outrora de palco para as famílias mais ilustres da região.'
                   : 'The restored monumental staircases once welcomed the region’s leading families, preserving a timeless sense of grandeur.'}
               </p>
             </div>
@@ -112,7 +112,7 @@ const History: React.FC<HistoryProps> = ({ navigateTo }) => {
               <h2 className="font-serif text-4xl text-charcoal">{locale === 'pt' ? 'O Jardim do Repouso' : 'The Garden of Rest'}</h2>
               <p className="text-charcoal/60 leading-relaxed font-light text-lg">
                 {locale === 'pt'
-                  ? 'A introducao da cupula de vidro na piscina e a revitalizacao do olival centenario trouxeram nova luz a propriedade.'
+                  ? 'A introdução da cúpula de vidro na piscina e a revitalização do olival centenário trouxeram nova luz à propriedade.'
                   : 'The glass pool dome and revitalized olive grove brought new light to the estate, balancing heritage with present-day comfort.'}
               </p>
             </div>
@@ -143,13 +143,13 @@ const History: React.FC<HistoryProps> = ({ navigateTo }) => {
       <section className="py-40 px-6 text-center bg-offwhite">
         <div className="max-w-3xl mx-auto space-y-12 scroll-reveal">
           <h2 className="font-serif text-4xl md:text-6xl text-charcoal">
-            {locale === 'pt' ? 'Faca parte do' : 'Become part of'} <br /> <span className="italic">{locale === 'pt' ? 'proximo capitulo.' : 'the next chapter.'}</span>
+            {locale === 'pt' ? 'Faça parte do' : 'Become part of'} <br /> <span className="italic">{locale === 'pt' ? 'próximo capítulo.' : 'the next chapter.'}</span>
           </h2>
           <button 
             onClick={() => navigateTo('home')}
             className="bg-gold text-white px-16 py-5 uppercase text-[10px] tracking-[0.4em] font-bold hover:bg-charcoal rounded-none transition-all shadow-xl"
           >
-            {locale === 'pt' ? 'Explorar as Suites' : 'Explore Suites'}
+            {locale === 'pt' ? 'Explorar as Suítes' : 'Explore Suites'}
           </button>
         </div>
       </section>
