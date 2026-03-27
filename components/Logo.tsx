@@ -26,6 +26,13 @@ const Logo: React.FC<LogoProps> = ({
 
   const currentColor = colors[color];
 
+  const imageFilterByColor: Record<LogoProps['color'], string> = {
+    white: 'brightness(0) invert(1)',
+    // Approximate brand gold from a black source logo.
+    gold: 'brightness(0) saturate(100%) invert(67%) sepia(22%) saturate(847%) hue-rotate(357deg) brightness(90%) contrast(88%)',
+    charcoal: 'none',
+  };
+
   // Se houver uma imagem definida e ela NÃO deu erro, tentamos renderizá-la
   if (LOGO_IMAGE_URL && !imageError) {
     return (
@@ -35,8 +42,7 @@ const Logo: React.FC<LogoProps> = ({
           alt="Palacium Logo" 
           className="h-full w-auto object-contain"
           style={{
-            // Filtro para garantir visibilidade em fundos escuros se necessário
-            filter: color === 'white' ? 'brightness(0) invert(1)' : 'none'
+            filter: imageFilterByColor[color],
           }}
           onError={() => {
             console.warn("Logo image failed to load, falling back to SVG.");

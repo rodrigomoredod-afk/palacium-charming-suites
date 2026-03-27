@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, Users, ChevronDown, ImageIcon, Search, ArrowRight, Check } from 'lucide-react';
 import { heroSlideshow } from '../images';
 import { ViewType, InitialBookingData } from '../types';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface HeroProps {
   navigateTo: (view: ViewType) => void;
@@ -14,6 +15,7 @@ const HERO_IMAGES = heroSlideshow;
 // Standalone component to prevent unmounting issues on state changes
 interface BookingBarContentProps {
   isStickyVersion?: boolean;
+  locale: 'pt' | 'en';
   cInRef: React.RefObject<HTMLInputElement | null>;
   cOutRef: React.RefObject<HTMLInputElement | null>;
   dropdownOpen: boolean;
@@ -32,6 +34,7 @@ interface BookingBarContentProps {
 
 const BookingBarContent: React.FC<BookingBarContentProps> = ({ 
   isStickyVersion = false,
+  locale,
   cInRef,
   cOutRef,
   dropdownOpen,
@@ -118,7 +121,9 @@ const BookingBarContent: React.FC<BookingBarContentProps> = ({
           }}
         >
           <div className="space-y-1">
-            <label className="block text-[8px] uppercase tracking-[0.4em] text-gold font-black">Comitiva</label>
+            <label className="block text-[8px] uppercase tracking-[0.4em] text-gold font-black">
+              {locale === 'pt' ? 'Comitiva' : 'Guests'}
+            </label>
             <div className="flex items-center gap-2">
               <Users className="w-3.5 h-3.5 text-gold/50" />
               <span className="text-sm md:text-base text-white font-medium">
@@ -147,7 +152,7 @@ const BookingBarContent: React.FC<BookingBarContentProps> = ({
             >
               <div className="p-2 space-y-1">
                 {[1, 2, 3, 4, 5, 6].map(n => {
-                  const label = `${n} Adulto${n > 1 ? 's' : ''}`;
+                  const label = locale === 'pt' ? `${n} Adulto${n > 1 ? 's' : ''}` : `${n} Adult${n > 1 ? 's' : ''}`;
                   const isSelected = guests === label;
                   return (
                     <button 
@@ -185,7 +190,11 @@ const BookingBarContent: React.FC<BookingBarContentProps> = ({
             }
           `}
         >
-          <span className="text-[10px] tracking-[0.3em]">{isStickyVersion ? 'Reservar' : 'Consultar'}</span>
+          <span className="text-[10px] tracking-[0.3em]">
+            {isStickyVersion
+              ? (locale === 'pt' ? 'Reservar' : 'Book')
+              : (locale === 'pt' ? 'Consultar' : 'Search')}
+          </span>
           <ArrowRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${isStickyVersion ? 'hidden xl:block' : ''}`} />
         </button>
       </div>
@@ -194,6 +203,7 @@ const BookingBarContent: React.FC<BookingBarContentProps> = ({
 };
 
 const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
+  const { locale } = useLocale();
   const [scrollY, setScrollY] = useState(0);
   const [isSticky, setIsSticky] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -208,7 +218,7 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
 
   const [checkIn, setCheckIn] = useState(getTodayStr());
   const [checkOut, setCheckOut] = useState(getTomorrowStr(getTodayStr()));
-  const [guests, setGuests] = useState('2 Adultos');
+  const [guests, setGuests] = useState(locale === 'pt' ? '2 Adultos' : '2 Adults');
   const [isGuestDropdownOpen, setIsGuestDropdownOpen] = useState(false);
   const [isStickyGuestDropdownOpen, setIsStickyGuestDropdownOpen] = useState(false);
 
@@ -216,6 +226,17 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
   const checkOutRef = useRef<HTMLInputElement>(null);
   const stickyCheckInRef = useRef<HTMLInputElement>(null);
   const stickyCheckOutRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const match = guests.match(/^(\d+)\s/);
+    if (!match) return;
+    const n = Number(match[1]);
+    if (Number.isNaN(n)) return;
+    const ptLabel = `${n} Adulto${n > 1 ? 's' : ''}`;
+    const enLabel = `${n} Adult${n > 1 ? 's' : ''}`;
+    const next = locale === 'pt' ? ptLabel : enLabel;
+    if (guests !== next) setGuests(next);
+  }, [locale, guests]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -252,10 +273,12 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
   };
 
   const formatDateDisplay = (dateStr: string) => {
-    if (!dateStr) return 'Data';
+    if (!dateStr) return locale === 'pt' ? 'Data' : 'Date';
     try {
       const [y, m, d] = dateStr.split('-');
-      const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      const months = locale === 'pt'
+        ? ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+        : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       return `${d} ${months[parseInt(m) - 1]}`;
     } catch (e) {
       return dateStr;
@@ -295,16 +318,18 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
             opacity: contentOpacity
           }}
         >
-          <span className="inline-block text-gold uppercase tracking-[0.6em] text-[10px] md:text-xs font-bold animate-fade-up [animation-delay:200ms]">
-            Experiência Singular
+          <span className="inline-block text-gold uppercase tracking-[0.35em] md:tracking-[0.5em] text-[10px] md:text-xs font-bold animate-fade-up [animation-delay:200ms]">
+            {locale === 'pt' ? 'Experiencia Singular' : 'Singular Experience'}
           </span>
           
           <div className="space-y-4 md:space-y-6 overflow-hidden">
              <h1 className="font-serif text-3xl sm:text-6xl md:text-8xl text-white leading-[1.1] md:leading-[1] animate-fade-up [animation-delay:400ms] px-2 transform-gpu">
-              Onde o Tempo <br className="hidden sm:block" /> <span className="italic font-light">Encontra a Alma.</span>
+              {locale === 'pt' ? 'Onde o Tempo' : 'Where Time'} <br className="hidden sm:block" /> <span className="italic font-light">{locale === 'pt' ? 'Encontra a Alma.' : 'Meets the Soul.'}</span>
             </h1>
             <p className="text-white/70 text-xs md:text-xl font-light max-w-2xl mx-auto animate-fade-up [animation-delay:600ms] px-6 tracking-wide">
-              Descubra o encanto de um retiro exclusivo no coração de Figueiró dos Vinhos.
+              {locale === 'pt'
+                ? 'Descubra o encanto de um retiro exclusivo no coracao de Figueiro dos Vinhos.'
+                : 'Discover the charm of an exclusive retreat in the heart of Figueiro dos Vinhos.'}
             </p>
           </div>
           
@@ -317,7 +342,7 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
               <div className="relative z-10 flex items-center gap-3">
                 <ImageIcon className="w-4 h-4 text-white/70 group-hover:text-white transition-colors duration-500" />
                 <span className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] font-bold group-hover:text-white transition-colors duration-500">
-                  Ver Galeria
+                  {locale === 'pt' ? 'Ver Galeria' : 'View Gallery'}
                 </span>
               </div>
             </button>
@@ -331,6 +356,7 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
         >
           <div className="bg-charcoal/90 backdrop-blur-xl border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.6)] rounded-sm transform transition-all duration-700 hover:border-gold/30">
             <BookingBarContent 
+              locale={locale}
               cInRef={checkInRef} 
               cOutRef={checkOutRef} 
               dropdownOpen={isGuestDropdownOpen}
@@ -347,7 +373,9 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
               handleSearch={handleSearch}
             />
           </div>
-          <p className="mt-4 text-[9px] uppercase tracking-[0.4em] text-white/20 font-black hidden md:block">Melhor Tarifa Garantida · Cancelamento Flexível</p>
+          <p className="mt-4 text-[9px] uppercase tracking-[0.4em] text-white/20 font-black hidden md:block">
+            {locale === 'pt' ? 'Melhor Tarifa Garantida · Cancelamento Flexivel' : 'Best Rate Guaranteed · Flexible Cancellation'}
+          </p>
         </div>
 
         <div className="absolute bottom-12 md:bottom-10 left-1/2 -translate-x-1/2 z-30 pointer-events-none" style={{ opacity: contentOpacity }}>
@@ -355,8 +383,8 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
             className="flex flex-col items-center gap-2 animate-bounce pointer-events-auto group cursor-pointer" 
             onClick={() => document.getElementById('heritage')?.scrollIntoView({ behavior: 'smooth' })}
           >
-            <span className="text-[7px] md:text-[8px] uppercase tracking-[0.5em] font-bold pl-[0.5em] text-white/40 group-hover:text-gold transition-colors">
-              Descobrir
+            <span className="text-[7px] md:text-[8px] uppercase tracking-[0.3em] md:tracking-[0.45em] font-bold pl-[0.3em] md:pl-[0.45em] text-white/40 group-hover:text-gold transition-colors">
+              {locale === 'pt' ? 'Descobrir' : 'Discover'}
             </span>
             <ChevronDown className="w-4 h-4 text-gold/40 group-hover:text-gold transition-colors" aria-hidden="true" />
           </button>
@@ -372,6 +400,7 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
         <div className="max-w-7xl mx-auto px-4 md:px-16">
           <BookingBarContent 
             isStickyVersion={true} 
+            locale={locale}
             cInRef={stickyCheckInRef} 
             cOutRef={stickyCheckOutRef}
             dropdownOpen={isStickyGuestDropdownOpen}

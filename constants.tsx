@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { suiteImages } from './images';
-import { Suite, Review, ReservationSource } from './types';
+import { Suite, Review, ReservationSource, SiteContent } from './types';
 import { Waves, Coffee, Wifi, Flower2, ShieldCheck, Accessibility, Utensils, MapPin, Tv, Car, Languages } from 'lucide-react';
 
 const Wind = (props: any) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4a2 2 0 1 0-1.4-3.4H2"/></svg>;
@@ -293,3 +293,22 @@ export const FEATURES = [
     description: 'Espaços exteriores e terraços desenhados para a serenidade absoluta.'
   }
 ];
+
+export const INITIAL_SITE_CONTENT: SiteContent = {
+  hero: {
+    pt: {
+      badge: 'Experiência Singular',
+      title: 'Onde o Tempo Encontra a Alma.',
+      subtitle: 'Descubra o encanto de um retiro exclusivo no coração de Figueiró dos Vinhos.',
+      galleryCta: 'Ver Galeria',
+      discoverLabel: 'Descobrir',
+    },
+    en: {
+      badge: 'Singular Experience',
+      title: 'Where Time Meets the Soul.',
+      subtitle: 'Discover an exclusive retreat in the heart of Figueiró dos Vinhos.',
+      galleryCta: 'View Gallery',
+      discoverLabel: 'Discover',
+    },
+  },
+};

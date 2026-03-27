@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X, CalendarCheck } from 'lucide-react';
 import { ViewType } from '../types';
 import Logo from './Logo';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface HeaderProps {
   scrolled: boolean;
@@ -13,6 +14,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ scrolled, navigateTo, currentView, openBooking }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { locale, toggleLocale } = useLocale();
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -45,11 +47,12 @@ const Header: React.FC<HeaderProps> = ({ scrolled, navigateTo, currentView, open
   const isHeaderDark = scrolled || isMenuOpen || !isTransparentView;
 
   const navLinks: { label: string; view: ViewType }[] = [
-    { label: 'Início', view: 'home' },
+    { label: locale === 'pt' ? 'Inicio' : 'Home', view: 'home' },
+    { label: locale === 'pt' ? 'Historia' : 'History', view: 'history' },
     { label: 'Suites', view: 'suites' },
-    { label: 'Parceiros', view: 'experiences' },
-    { label: 'Galeria', view: 'gallery' },
-    { label: 'Sobre Nós', view: 'about' },
+    { label: locale === 'pt' ? 'Parceiros' : 'Partners', view: 'experiences' },
+    { label: locale === 'pt' ? 'Galeria' : 'Gallery', view: 'gallery' },
+    { label: locale === 'pt' ? 'Sobre Nos' : 'About Us', view: 'about' },
   ];
 
   return (
@@ -84,6 +87,14 @@ const Header: React.FC<HeaderProps> = ({ scrolled, navigateTo, currentView, open
               <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-gold transition-all group-hover:w-full"></span>
             </button>
           ))}
+
+          <button
+            onClick={toggleLocale}
+            className="hover:text-gold transition-colors"
+            aria-label={locale === 'pt' ? 'Mudar idioma' : 'Change language'}
+          >
+            {locale.toUpperCase()}
+          </button>
           
           {/* Enhanced Booking Button */}
           <button 
@@ -101,7 +112,7 @@ const Header: React.FC<HeaderProps> = ({ scrolled, navigateTo, currentView, open
             
             {/* Content */}
             <span className={`relative z-10 flex items-center justify-center font-bold transition-colors duration-300 group-hover:text-white`}>
-              <span>RESERVAR</span>
+              <span>{locale === 'pt' ? 'RESERVAR' : 'BOOK'}</span>
               <CalendarCheck className="w-0 h-3.5 opacity-0 group-hover:w-3.5 group-hover:ml-2 group-hover:opacity-100 transition-all duration-500 ease-out" />
             </span>
           </button>
@@ -113,7 +124,7 @@ const Header: React.FC<HeaderProps> = ({ scrolled, navigateTo, currentView, open
               onClick={handleBooking}
               className="bg-gold text-white px-5 py-2.5 rounded-sm text-[9px] uppercase tracking-[0.2em] font-bold shadow-lg shadow-gold/20 animate-fade-left active:scale-95 transition-transform flex items-center gap-2"
             >
-              Reservar
+              {locale === 'pt' ? 'Reservar' : 'Book'}
             </button>
           )}
 
@@ -122,7 +133,7 @@ const Header: React.FC<HeaderProps> = ({ scrolled, navigateTo, currentView, open
             className={`p-2 transition-all duration-500 transform ${isMenuOpen ? 'rotate-90 text-charcoal' : 'rotate-0'} ${
               isHeaderDark ? 'text-charcoal' : 'text-white'
             }`}
-            aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
+            aria-label={isMenuOpen ? (locale === 'pt' ? 'Fechar menu' : 'Close menu') : (locale === 'pt' ? 'Abrir menu' : 'Open menu')}
           >
             {isMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
           </button>
@@ -139,6 +150,16 @@ const Header: React.FC<HeaderProps> = ({ scrolled, navigateTo, currentView, open
       >
         <nav className="w-full flex flex-col items-center space-y-8 px-6 py-20 text-center relative z-10">
           <div className="space-y-4 w-full">
+            <button
+              onClick={toggleLocale}
+              style={{ transitionDelay: '50ms' }}
+              className={`block w-full text-charcoal/80 text-base tracking-[0.3em] uppercase transition-all duration-500 ${
+                isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+              }`}
+            >
+              {locale.toUpperCase()}
+            </button>
+
             {navLinks.map((link, index) => (
               <button 
                 key={link.view}
@@ -167,7 +188,7 @@ const Header: React.FC<HeaderProps> = ({ scrolled, navigateTo, currentView, open
               isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
             }`}
           >
-            <span>Reservar Agora</span>
+            <span>{locale === 'pt' ? 'Reservar Agora' : 'Book Now'}</span>
             <CalendarCheck className="w-4 h-4" />
           </button>
         </nav>

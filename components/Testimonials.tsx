@@ -2,14 +2,43 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Star, Globe, ChevronLeft, ChevronRight, CheckCircle2, TrendingUp } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
+import { useLocale } from '../contexts/LocaleContext';
 
 const Testimonials: React.FC = () => {
   const { reviews, bookingDisplayScore } = useData();
+  const { locale } = useLocale();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
+  const nationalityEn: Record<string, string> = {
+    Portugal: 'Portugal',
+    'Estados Unidos': 'United States',
+    'Reino Unido': 'United Kingdom',
+    Israel: 'Israel',
+  };
+  const monthEn: Record<string, string> = {
+    Janeiro: 'January',
+    Fevereiro: 'February',
+    Marco: 'March',
+    Abril: 'April',
+    Maio: 'May',
+    Junho: 'June',
+    Julho: 'July',
+    Agosto: 'August',
+    Setembro: 'September',
+    Outubro: 'October',
+    Novembro: 'November',
+    Dezembro: 'December',
+  };
+
+  const translateDate = (value: string) => {
+    if (locale === 'pt') return value;
+    const [month, year] = value.split(' ');
+    if (!month || !year) return value;
+    return `${monthEn[month] ?? month} ${year}`;
+  };
 
   // Calculate rating distribution for the summary dashboard
   const ratingDistribution = useMemo(() => {
@@ -92,13 +121,15 @@ const Testimonials: React.FC = () => {
         {/* Editorial Header & Rating Summary */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 mb-20 md:mb-32 items-center">
           <div className="lg:col-span-5 space-y-8 scroll-reveal">
-            <span className="text-gold uppercase tracking-[0.7em] text-[10px] font-black block">Herança de Opinião</span>
+            <span className="text-gold uppercase tracking-[0.35em] md:tracking-[0.55em] text-[10px] font-black block">{locale === 'pt' ? 'Herança de Opinião' : 'Guest Legacy'}</span>
             <h2 className="font-serif text-5xl md:text-8xl leading-[1.05] tracking-tight">
-              A Voz dos <br />
-              <span className="italic font-light text-white/90">Nossos Hóspedes.</span>
+              {locale === 'pt' ? 'A Voz dos' : 'The Voice of'} <br />
+              <span className="italic font-light text-white/90">{locale === 'pt' ? 'Nossos Hóspedes.' : 'Our Guests.'}</span>
             </h2>
             <p className="text-white/40 text-sm md:text-lg font-light leading-relaxed max-w-md">
-              A nossa reputação é construída sobre a satisfação absoluta de quem nos visita. Cada estadia é uma promessa de excelência cumprida.
+              {locale === 'pt'
+                ? 'A nossa reputacao e construida sobre a satisfacao absoluta de quem nos visita. Cada estadia e uma promessa de excelencia cumprida.'
+                : 'Our reputation is built on guest satisfaction. Every stay is a promise of excellence delivered.'}
             </p>
           </div>
 
@@ -138,14 +169,14 @@ const Testimonials: React.FC = () => {
           <button 
             onClick={() => navigate('prev')}
             className={`absolute left-12 top-1/2 -translate-y-1/2 z-50 p-6 transition-all duration-500 border rounded-full bg-charcoal/40 backdrop-blur-xl ${canScrollLeft ? 'border-gold/40 text-gold hover:border-gold hover:bg-gold hover:text-white translate-x-0' : 'opacity-0 -translate-x-10 pointer-events-none'}`}
-            aria-label="Anterior"
+            aria-label={locale === 'pt' ? 'Anterior' : 'Previous'}
           >
             <ChevronLeft className="w-8 h-8 stroke-[1px]" />
           </button>
           <button 
             onClick={() => navigate('next')}
             className={`absolute right-12 top-1/2 -translate-y-1/2 z-50 p-6 transition-all duration-500 border rounded-full bg-charcoal/40 backdrop-blur-xl ${canScrollRight ? 'border-gold/40 text-gold hover:border-gold hover:bg-gold hover:text-white translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none'}`}
-            aria-label="Próximo"
+            aria-label={locale === 'pt' ? 'Proximo' : 'Next'}
           >
             <ChevronRight className="w-8 h-8 stroke-[1px]" />
           </button>
@@ -186,7 +217,7 @@ const Testimonials: React.FC = () => {
                        {isActive && (
                          <div className="flex items-center gap-1.5 animate-fade-up">
                            <CheckCircle2 className="w-3 h-3 text-gold/60" />
-                           <span className="text-[8px] uppercase tracking-widest font-black text-gold/40">Estadia Verificada</span>
+                           <span className="text-[8px] uppercase tracking-widest font-black text-gold/40">{locale === 'pt' ? 'Estadia Verificada' : 'Verified Stay'}</span>
                          </div>
                        )}
                     </div>
@@ -207,12 +238,16 @@ const Testimonials: React.FC = () => {
                         <h4 className={`text-[12px] uppercase tracking-[0.2em] font-black transition-colors duration-700 ${isActive ? 'text-white' : 'text-white/20'}`}>{review.author}</h4>
                         <div className="flex items-center gap-2 mt-1">
                            <Globe className={`w-3 h-3 transition-colors duration-700 ${isActive ? 'text-gold/50' : 'text-white/5'}`} />
-                           <span className={`text-[9px] uppercase tracking-[0.3em] font-bold transition-colors duration-700 ${isActive ? 'text-white/40' : 'text-white/5'}`}>{review.nationality || 'Hóspede'}</span>
+                           <span className={`text-[9px] uppercase tracking-[0.3em] font-bold transition-colors duration-700 ${isActive ? 'text-white/40' : 'text-white/5'}`}>
+                            {locale === 'pt'
+                              ? (review.nationality || 'Hospede')
+                              : (nationalityEn[review.nationality || ''] || review.nationality || 'Guest')}
+                           </span>
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                       <p className={`text-[10px] uppercase tracking-widest font-black transition-colors duration-700 ${isActive ? 'text-white/20' : 'text-white/5'}`}>{review.date}</p>
+                       <p className={`text-[10px] uppercase tracking-widest font-black transition-colors duration-700 ${isActive ? 'text-white/20' : 'text-white/5'}`}>{translateDate(review.date)}</p>
                     </div>
                   </div>
                 </div>
@@ -247,7 +282,7 @@ const Testimonials: React.FC = () => {
         </div>
 
         <div className="md:hidden mt-12 text-center">
-            <span className="text-[10px] uppercase tracking-[0.8em] text-white/5 font-black animate-pulse">Deslize para Navegar</span>
+            <span className="text-[10px] uppercase tracking-[0.35em] text-white/5 font-black animate-pulse">{locale === 'pt' ? 'Deslize para Navegar' : 'Swipe to Navigate'}</span>
         </div>
       </div>
     </section>

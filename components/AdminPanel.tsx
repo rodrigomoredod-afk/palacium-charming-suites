@@ -1,11 +1,13 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useData } from '../contexts/DataContext';
 import { Lock, Save, RotateCcw, DollarSign, ArrowLeft, MessageSquare, Tag, Trash2, Sparkles, Loader2, Plus, Globe, Star, AlertTriangle, CalendarDays, Phone, Mail } from 'lucide-react';
 import { ViewType, Review, ReservationSource, ReservationStatus } from '../types';
 import { RESERVATION_SOURCE_LABELS } from '../constants';
 import { submitReservationRemote } from '../lib/submitReservationRemote';
 import { GoogleGenAI, Type } from "@google/genai";
+import { authenticate, canManageContent, clearAuthSession, readAuthSession, saveAuthSession, type AdminRole } from '../lib/auth';
+import { computeNights } from '../lib/reservationUtils';
 
 interface AdminPanelProps {
   navigateTo: (view: ViewType) => void;
@@ -24,12 +26,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
     updateReservation,
     deleteReservation,
     setBookingDisplayScore,
+    siteContent,
+    updateHeroContent,
     resetData,
   } = useData();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [role, setRole] = useState<AdminRole>('viewer');
+  const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'prices' | 'reviews' | 'reservations'>('prices');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [localLockUntil, setLocalLockUntil] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<'prices' | 'reviews' | 'reservations' | 'content'>('prices');
+  const [reservationFilter, setReservationFilter] = useState<'all' | ReservationStatus>('all');
 
   const [resForm, setResForm] = useState({
     source: 'phone' as ReservationSource,
@@ -56,14 +65,34 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
   // Deletion State
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  useEffect(() => {
+    const existingSession = readAuthSession();
+    if (existingSession) {
+      setRole(existingSession.role);
+      setUsername(existingSession.username);
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'admin123') {
+    if (Date.now() < localLockUntil) {
+      setError('Too many attempts. Wait a moment and try again.');
+      return;
+    }
+    setIsLoggingIn(true);
+    const user = await authenticate(username, password);
+    if (user) {
+      saveAuthSession(user);
+      setRole(user.role);
       setIsAuthenticated(true);
       setError('');
+      setPassword('');
     } else {
-      setError('Password incorreta');
+      setError('Credenciais inválidas');
+      setLocalLockUntil(Date.now() + 6000);
     }
+    setIsLoggingIn(false);
   };
 
   const handlePriceChange = (id: string, val: string) => {
@@ -87,22 +116,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
   };
 
   const sortedReservations = useMemo(() => {
-    return [...reservations].sort((a, b) => {
+    const filtered =
+      reservationFilter === 'all'
+        ? reservations
+        : reservations.filter((reservation) => reservation.status === reservationFilter);
+    return [...filtered].sort((a, b) => {
       const byStay = a.checkIn.localeCompare(b.checkIn);
       if (byStay !== 0) return byStay;
       return b.createdAt.localeCompare(a.createdAt);
     });
-  }, [reservations]);
-
-  const computeNights = (checkIn: string, checkOut: string) => {
-    if (!checkIn || !checkOut) return 0;
-    const [y1, m1, d1] = checkIn.split('-').map(Number);
-    const [y2, m2, d2] = checkOut.split('-').map(Number);
-    const start = new Date(y1, m1 - 1, d1);
-    const end = new Date(y2, m2 - 1, d2);
-    const diff = Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
-    return diff > 0 ? diff : 0;
-  };
+  }, [reservationFilter, reservations]);
 
   const handleSubmitManualReservation = (e: React.FormEvent) => {
     e.preventDefault();
@@ -226,6 +249,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
           
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
+              <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">Utilizador</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full bg-bone border border-charcoal/10 p-4 focus:border-gold outline-none transition-colors font-serif"
+                placeholder="admin"
+              />
+            </div>
+            <div>
               <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">Password</label>
               <input 
                 type="password" 
@@ -237,8 +270,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
             </div>
             {error && <p className="text-red-500 text-xs font-bold uppercase tracking-widest">{error}</p>}
             
-            <button type="submit" className="w-full bg-gold text-white py-4 uppercase text-xs tracking-[0.3em] font-bold hover:bg-charcoal transition-colors">
-              Entrar
+            <button
+              type="submit"
+              disabled={isLoggingIn}
+              className="w-full bg-gold text-white py-4 uppercase text-xs tracking-[0.3em] font-bold hover:bg-charcoal transition-colors disabled:opacity-60"
+            >
+              {isLoggingIn ? 'A validar...' : 'Entrar'}
             </button>
           </form>
           
@@ -261,7 +298,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
             >
               <ArrowLeft className="w-4 h-4" /> Sair do Painel
             </button>
+            <button
+              onClick={() => {
+                clearAuthSession();
+                setIsAuthenticated(false);
+              }}
+              className="text-[9px] uppercase tracking-widest text-charcoal/50 hover:text-gold"
+            >
+              Terminar sessão
+            </button>
             <h1 className="font-serif text-4xl md:text-5xl tracking-tight">Painel de Gestão</h1>
+            <p className="text-[10px] uppercase tracking-widest text-charcoal/40 mt-2">Perfil: {role}</p>
           </div>
 
           <div className="flex flex-wrap bg-white p-1 border border-charcoal/5 rounded-sm shadow-sm gap-1">
@@ -285,6 +332,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
                 className={`flex items-center gap-2 px-4 md:px-6 py-2 text-[10px] uppercase tracking-widest font-bold transition-all ${activeTab === 'reviews' ? 'bg-gold text-white' : 'text-charcoal/40 hover:text-charcoal'}`}
              >
                 <MessageSquare className="w-3 h-3" /> Comentários
+             </button>
+             <button
+                type="button"
+                onClick={() => setActiveTab('content')}
+                className={`flex items-center gap-2 px-4 md:px-6 py-2 text-[10px] uppercase tracking-widest font-bold transition-all ${activeTab === 'content' ? 'bg-gold text-white' : 'text-charcoal/40 hover:text-charcoal'}`}
+             >
+                <Globe className="w-3 h-3" /> Conteúdo
              </button>
           </div>
         </div>
@@ -377,6 +431,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
             </div>
 
             <div className="bg-white rounded-sm shadow-xl border border-charcoal/5 overflow-hidden">
+              <div className="px-4 md:px-6 py-3 border-b border-charcoal/5 flex items-center gap-3">
+                <span className="text-[10px] uppercase tracking-widest text-charcoal/40 font-bold">Filtro</span>
+                <select
+                  value={reservationFilter}
+                  onChange={(e) => setReservationFilter(e.target.value as 'all' | ReservationStatus)}
+                  className="text-[10px] uppercase tracking-widest font-bold border border-charcoal/10 rounded-sm py-2 px-2 bg-bone focus:border-gold outline-none"
+                >
+                  <option value="all">Todas</option>
+                  <option value="pending">Pendentes</option>
+                  <option value="confirmed">Confirmadas</option>
+                  <option value="cancelled">Canceladas</option>
+                  <option value="completed">Concluídas</option>
+                </select>
+              </div>
               <div className="grid grid-cols-12 bg-charcoal text-white py-4 px-4 md:px-6 text-[9px] md:text-[10px] uppercase tracking-[0.15em] font-bold gap-2">
                 <div className="col-span-6 md:col-span-2">Estadia</div>
                 <div className="col-span-6 md:col-span-2">Origem</div>
@@ -435,6 +503,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
                             <option value="pending">Pendente</option>
                             <option value="confirmed">Confirmada</option>
                             <option value="cancelled">Cancelada</option>
+                            <option value="completed">Concluída</option>
                           </select>
                         </div>
                         <div className="col-span-4 md:col-span-1 flex justify-end">
@@ -479,6 +548,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
                     <option value="pending">Pendente</option>
                     <option value="confirmed">Confirmada</option>
                     <option value="cancelled">Cancelada</option>
+                    <option value="completed">Concluída</option>
                   </select>
                 </div>
                 <div>
@@ -694,6 +764,67 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
                   })}
                </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === 'content' && (
+          <div className="space-y-8">
+            {!canManageContent(role) ? (
+              <div className="bg-white p-8 border border-charcoal/5 shadow-xl rounded-sm">
+                <p className="text-sm text-charcoal/60">Este perfil pode visualizar reservas, mas não editar conteúdo.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {(['pt', 'en'] as const).map((locale) => (
+                  <div key={locale} className="bg-white p-8 border border-charcoal/5 shadow-xl rounded-sm space-y-4">
+                    <h3 className="font-serif text-2xl">Hero ({locale.toUpperCase()})</h3>
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">Badge</label>
+                      <input
+                        value={siteContent.hero[locale].badge}
+                        onChange={(e) => updateHeroContent(locale, { badge: e.target.value })}
+                        className="w-full bg-bone border border-charcoal/10 p-3 text-sm focus:border-gold outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">Título</label>
+                      <input
+                        value={siteContent.hero[locale].title}
+                        onChange={(e) => updateHeroContent(locale, { title: e.target.value })}
+                        className="w-full bg-bone border border-charcoal/10 p-3 text-sm focus:border-gold outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">Subtítulo</label>
+                      <textarea
+                        value={siteContent.hero[locale].subtitle}
+                        onChange={(e) => updateHeroContent(locale, { subtitle: e.target.value })}
+                        rows={3}
+                        className="w-full bg-bone border border-charcoal/10 p-3 text-sm focus:border-gold outline-none"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">CTA Galeria</label>
+                        <input
+                          value={siteContent.hero[locale].galleryCta}
+                          onChange={(e) => updateHeroContent(locale, { galleryCta: e.target.value })}
+                          className="w-full bg-bone border border-charcoal/10 p-3 text-sm focus:border-gold outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">Descobrir</label>
+                        <input
+                          value={siteContent.hero[locale].discoverLabel}
+                          onChange={(e) => updateHeroContent(locale, { discoverLabel: e.target.value })}
+                          className="w-full bg-bone border border-charcoal/10 p-3 text-sm focus:border-gold outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

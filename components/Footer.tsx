@@ -3,12 +3,14 @@ import React from 'react';
 import { Instagram, Facebook, Mail, Phone, MapPin, Info, Lock } from 'lucide-react';
 import { ViewType } from '../types';
 import Logo from './Logo';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface FooterProps {
   navigateTo: (view: ViewType) => void;
 }
 
 const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
+  const { locale } = useLocale();
   return (
     <footer className="bg-charcoal text-white/80 pt-20 pb-10 px-8 md:px-16 border-t border-white/5">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
@@ -20,7 +22,9 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
             <Logo className="h-24" color="white" />
           </div>
           <p className="text-sm leading-relaxed text-white/50">
-            Um refúgio de luxo onde a história portuguesa é celebrada em cada detalhe. O seu retiro exclusivo no coração de Figueiró dos Vinhos.
+            {locale === 'pt'
+              ? 'Um refúgio de luxo onde a história portuguesa é celebrada em cada detalhe. O seu retiro exclusivo no coração de Figueiró dos Vinhos.'
+              : 'A luxury retreat where Portuguese heritage is celebrated in every detail, in the heart of Figueiro dos Vinhos.'}
           </p>
           <div className="flex gap-4">
             <a href="#" className="hover:text-gold transition-colors" aria-label="Instagram"><Instagram className="w-5 h-5" /></a>
@@ -29,31 +33,36 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
         </div>
 
         <div className="space-y-6">
-          <h3 className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">Navegação</h3>
+          <h3 className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">{locale === 'pt' ? 'Navegação' : 'Navigation'}</h3>
           <ul className="space-y-4 text-sm">
-            <li><button onClick={() => navigateTo('about')} className="hover:text-white transition-colors">Sobre Nós</button></li>
+            <li><button onClick={() => navigateTo('history')} className="hover:text-white transition-colors">{locale === 'pt' ? 'Historia' : 'History'}</button></li>
+            <li><button onClick={() => navigateTo('about')} className="hover:text-white transition-colors">{locale === 'pt' ? 'Sobre Nós' : 'About Us'}</button></li>
             <li><button onClick={() => navigateTo('suites')} className="hover:text-white transition-colors">Royal Suites</button></li>
-            <li><button onClick={() => navigateTo('experiences')} className="hover:text-white transition-colors">Parceiros</button></li>
-            <li><button onClick={() => navigateTo('gallery')} className="hover:text-white transition-colors">Galeria</button></li>
+            <li><button onClick={() => navigateTo('experiences')} className="hover:text-white transition-colors">{locale === 'pt' ? 'Parceiros' : 'Partners'}</button></li>
+            <li><button onClick={() => navigateTo('gallery')} className="hover:text-white transition-colors">{locale === 'pt' ? 'Galeria' : 'Gallery'}</button></li>
           </ul>
         </div>
 
         <div className="space-y-6">
-          <h3 className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">Localização e Contacto</h3>
+          <h3 className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">{locale === 'pt' ? 'Localização e Contacto' : 'Location and Contact'}</h3>
           <ul className="space-y-4 text-sm">
             <li className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-gold" />
                 <a href="tel:+351965795859" className="hover:text-white transition-colors font-medium">+351 965 795 859</a>
               </div>
-              <span className="text-[9px] text-white/30 ml-7 leading-none uppercase tracking-tighter">(chamada para a rede móvel nacional)</span>
+              <span className="text-[9px] text-white/30 ml-7 leading-none uppercase tracking-tighter">
+                {locale === 'pt' ? '(chamada para a rede movel nacional)' : '(call to national mobile network)'}
+              </span>
             </li>
             <li className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-gold" />
                 <a href="tel:+351236553117" className="hover:text-white transition-colors font-medium">+351 236 553 117</a>
               </div>
-              <span className="text-[9px] text-white/30 ml-7 leading-none uppercase tracking-tighter">(chamada para a rede fixa nacional)</span>
+              <span className="text-[9px] text-white/30 ml-7 leading-none uppercase tracking-tighter">
+                {locale === 'pt' ? '(chamada para a rede fixa nacional)' : '(call to national landline network)'}
+              </span>
             </li>
             <li className="flex items-center gap-3">
               <Mail className="w-4 h-4 text-gold" />
@@ -67,12 +76,12 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
         </div>
 
         <div className="space-y-6">
-          <h3 className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">Informação Legal</h3>
+          <h3 className="text-[10px] uppercase tracking-[0.3em] text-gold font-bold">{locale === 'pt' ? 'Informacao Legal' : 'Legal Information'}</h3>
           <div className="space-y-6 flex flex-col items-start">
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/40 font-bold">
                 <Info className="w-3 h-3 text-gold" />
-                <span>Dados da Empresa</span>
+                <span>{locale === 'pt' ? 'Dados da Empresa' : 'Company Details'}</span>
               </div>
               <p className="text-[9px] text-white/40 uppercase tracking-[0.2em] leading-relaxed font-medium">
                 Ibericador, Unipessoal Lda<br />
@@ -89,7 +98,7 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="group flex items-center gap-4 hover:bg-white/5 p-2 -ml-2 rounded-sm transition-colors"
-                aria-label="Aceder ao Livro de Reclamações Eletrónico"
+                aria-label={locale === 'pt' ? 'Aceder ao Livro de Reclamacoes Eletronico' : 'Open Electronic Complaints Book'}
               >
                 <div className="shrink-0">
                   <svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-60 group-hover:opacity-100 transition-opacity">
@@ -103,13 +112,13 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
                   </svg>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[8px] uppercase tracking-[0.2em] font-bold text-white group-hover:text-gold transition-colors">Livro de</span>
-                  <span className="text-[8px] uppercase tracking-[0.2em] font-bold text-white group-hover:text-gold transition-colors">Reclamações</span>
+                  <span className="text-[8px] uppercase tracking-[0.2em] font-bold text-white group-hover:text-gold transition-colors">{locale === 'pt' ? 'Livro de' : 'Complaints'}</span>
+                  <span className="text-[8px] uppercase tracking-[0.2em] font-bold text-white group-hover:text-gold transition-colors">{locale === 'pt' ? 'Reclamacoes' : 'Book'}</span>
                 </div>
               </a>
               
               <p className="text-[10px] text-white/30 uppercase tracking-widest leading-relaxed">
-                Turismo de Portugal<br />RNET: [A aguardar registo]
+                Turismo de Portugal<br />RNET: {locale === 'pt' ? '[A aguardar registo]' : '[Registration pending]'}
               </p>
             </div>
           </div>
@@ -117,12 +126,14 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
       </div>
 
       <div className="max-w-7xl mx-auto pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
-        <p className="text-[10px] uppercase tracking-widest text-white/20">© 2024 Palacium Charming Suites. Todos os direitos reservados.</p>
+        <p className="text-[10px] uppercase tracking-widest text-white/20">
+          © 2024 Palacium Charming Suites. {locale === 'pt' ? 'Todos os direitos reservados.' : 'All rights reserved.'}
+        </p>
         <div className="flex flex-wrap justify-center items-center gap-8 text-[10px] uppercase tracking-widest text-white/30">
-          <a href="#" className="hover:text-white transition-colors">Política de Privacidade</a>
-          <a href="#" className="hover:text-white transition-colors">Termos e Condições</a>
+          <a href="#" className="hover:text-white transition-colors">{locale === 'pt' ? 'Politica de Privacidade' : 'Privacy Policy'}</a>
+          <a href="#" className="hover:text-white transition-colors">{locale === 'pt' ? 'Termos e Condicoes' : 'Terms and Conditions'}</a>
           <button onClick={() => navigateTo('admin')} className="hover:text-gold transition-colors flex items-center gap-1 group">
-             <Lock className="w-3 h-3 group-hover:text-gold" /> Área Reservada
+             <Lock className="w-3 h-3 group-hover:text-gold" /> {locale === 'pt' ? 'Area Reservada' : 'Restricted Area'}
           </button>
         </div>
       </div>

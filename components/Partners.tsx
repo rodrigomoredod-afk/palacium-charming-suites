@@ -1,22 +1,40 @@
 
 import React from 'react';
 import { Handshake, Globe, Award, ShieldCheck, Sparkles } from 'lucide-react';
+import { useLocale } from '../contexts/LocaleContext';
 
 const Partners: React.FC = () => {
+  const { locale } = useLocale();
   const placeholders = [
-    { name: "Parceiro de Excelência I", category: "Gastronomia Local", icon: <Award className="w-5 h-5" /> },
-    { name: "Parceiro de Excelência II", category: "Experiências & Lazer", icon: <Sparkles className="w-5 h-5" /> },
-    { name: "Parceiro de Excelência III", category: "Bem-Estar & Spa", icon: <ShieldCheck className="w-5 h-5" /> },
-    { name: "Parceiro de Excelência IV", category: "Artes & Cultura", icon: <Globe className="w-5 h-5" /> }
+    {
+      name: locale === 'pt' ? 'Parceiro de Excelencia I' : 'Excellence Partner I',
+      category: locale === 'pt' ? 'Gastronomia Local' : 'Local Gastronomy',
+      icon: <Award className="w-5 h-5" />,
+    },
+    {
+      name: locale === 'pt' ? 'Parceiro de Excelencia II' : 'Excellence Partner II',
+      category: locale === 'pt' ? 'Experiencias & Lazer' : 'Experiences & Leisure',
+      icon: <Sparkles className="w-5 h-5" />,
+    },
+    {
+      name: locale === 'pt' ? 'Parceiro de Excelencia III' : 'Excellence Partner III',
+      category: locale === 'pt' ? 'Bem-Estar & Spa' : 'Wellness & Spa',
+      icon: <ShieldCheck className="w-5 h-5" />,
+    },
+    {
+      name: locale === 'pt' ? 'Parceiro de Excelencia IV' : 'Excellence Partner IV',
+      category: locale === 'pt' ? 'Artes & Cultura' : 'Arts & Culture',
+      icon: <Globe className="w-5 h-5" />,
+    },
   ];
 
   return (
     <section id="partners" className="py-24 md:py-40 px-6 md:px-16 bg-white overflow-hidden border-t border-charcoal/5">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-20 md:mb-32 scroll-reveal">
-          <span className="text-gold uppercase tracking-[0.4em] text-[10px] font-bold block mb-4">Colaborações</span>
+          <span className="text-gold uppercase tracking-[0.4em] text-[10px] font-bold block mb-4">{locale === 'pt' ? 'Colaboracoes' : 'Collaborations'}</span>
           <h2 className="font-serif text-4xl md:text-6xl text-charcoal leading-tight">
-            Parceiros & <span className="italic font-light">Alianças.</span>
+            {locale === 'pt' ? 'Parceiros &' : 'Partners &'} <span className="italic font-light">{locale === 'pt' ? 'Aliancas.' : 'Alliances.'}</span>
           </h2>
           <div className="w-12 h-[1px] bg-gold/30 mx-auto mt-8"></div>
         </div>
@@ -37,7 +55,7 @@ const Partners: React.FC = () => {
                 <h3 className="font-serif text-xl text-charcoal group-hover:text-gold transition-colors">{partner.name}</h3>
               </div>
               <div className="mt-8 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                <p className="text-[10px] text-charcoal/40 uppercase tracking-widest leading-relaxed italic">Curadoria Especial Palacium</p>
+                <p className="text-[10px] text-charcoal/40 uppercase tracking-widest leading-relaxed italic">{locale === 'pt' ? 'Curadoria Especial Palacium' : 'Curated by Palacium'}</p>
               </div>
             </div>
           ))}
@@ -46,7 +64,7 @@ const Partners: React.FC = () => {
         <div className="mt-20 md:mt-32 flex justify-center scroll-reveal">
           <div className="flex items-center gap-4 text-charcoal/20">
             <Handshake className="w-4 h-4" />
-            <p className="text-[10px] uppercase tracking-[0.4em] font-bold">A construir o futuro da hospitalidade em conjunto</p>
+            <p className="text-[10px] uppercase tracking-[0.4em] font-bold">{locale === 'pt' ? 'A construir o futuro da hospitalidade em conjunto' : 'Building the future of hospitality together'}</p>
           </div>
         </div>
       </div>

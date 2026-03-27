@@ -2,27 +2,39 @@
 import React from 'react';
 import { FEATURES } from '../constants';
 import { introductionImages } from '../images';
+import Section from './ui/Section';
+import SmartImage from './ui/SmartImage';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface IntroductionProps {
   navigateTo: (view: 'home' | 'history') => void;
 }
 
 const Introduction: React.FC<IntroductionProps> = ({ navigateTo }) => {
+  const { locale } = useLocale();
+  const featureLabelsEn = [
+    'Individual Climate Control',
+    'Pause Moment',
+    'Full Connectivity',
+    'Garden Serenity',
+  ];
+
   return (
-    <section id="heritage" className="py-24 md:py-40 px-6 md:px-16 bg-offwhite overflow-hidden">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+    <Section id="heritage" className="py-24 md:py-40 px-6 md:px-16 bg-offwhite overflow-hidden" containerClassName="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
         
         {/* Editorial Text */}
         <div className="scroll-reveal space-y-10 order-2 lg:order-1">
           <div className="space-y-4">
-            <span className="text-gold uppercase tracking-[0.4em] text-xs font-semibold block">Herança de 1905</span>
+            <span className="text-gold uppercase tracking-[0.4em] text-xs font-semibold block">{locale === 'pt' ? 'Herança de 1905' : 'Heritage Since 1905'}</span>
             <h2 className="font-serif text-4xl md:text-6xl text-charcoal leading-tight">
-              Onde a pedra <br /> <span className="italic">conta histórias.</span>
+              {locale === 'pt' ? 'Onde a pedra' : 'Where stone'} <br /> <span className="italic">{locale === 'pt' ? 'conta histórias.' : 'tells stories.'}</span>
             </h2>
           </div>
           
           <p className="text-charcoal/70 text-lg leading-relaxed font-light border-l-2 border-gold/30 pl-8">
-            Situado numa propriedade histórica onde a robustez da pedra original se funde com a leveza da natureza, o Palacium é emoldurado por oliveiras centenárias. Aqui, cada detalhe arquitetónico de 1905 foi preservado para oferecer uma experiência de luxo autêntica, onde o granito ancestral encontra o design contemporâneo.
+            {locale === 'pt'
+              ? 'Situado numa propriedade histórica onde a robustez da pedra original se funde com a leveza da natureza, o Palacium é emoldurado por oliveiras centenárias. Aqui, cada detalhe arquitetónico de 1905 foi preservado para oferecer uma experiência de luxo autêntica, onde o granito ancestral encontra o design contemporâneo.'
+              : 'Set in a historic estate where original stone meets natural serenity, Palacium is framed by centenary olive trees. Every architectural detail from 1905 is preserved to deliver an authentic luxury experience.'}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 pt-6">
@@ -31,7 +43,9 @@ const Introduction: React.FC<IntroductionProps> = ({ navigateTo }) => {
                 <div className="text-gold mb-3 transition-transform duration-500 group-hover:-translate-y-1">
                   {feature.icon}
                 </div>
-                <h4 className="text-[10px] uppercase tracking-widest text-charcoal font-bold">{feature.label}</h4>
+                <h4 className="text-[10px] uppercase tracking-widest text-charcoal font-bold">
+                  {locale === 'pt' ? feature.label : (featureLabelsEn[idx] ?? feature.label)}
+                </h4>
               </div>
             ))}
           </div>
@@ -40,18 +54,19 @@ const Introduction: React.FC<IntroductionProps> = ({ navigateTo }) => {
             onClick={() => navigateTo('history')}
             className="text-xs uppercase tracking-[0.3em] font-bold border-b border-gold pb-2 hover:text-gold transition-colors"
           >
-            Explorar a Herança
+            {locale === 'pt' ? 'Explorar a Herança' : 'Explore Heritage'}
           </button>
         </div>
 
         {/* Visual Composition - Using the Real Reception Stairs Photo provided by User */}
         <div className="relative order-1 lg:order-2">
           <div className="relative z-10 aspect-[4/5] overflow-hidden rounded-sm shadow-2xl scroll-reveal">
-            <img 
+            <SmartImage
               src={introductionImages.heritage} 
-              alt="Interiores históricos do Palacium" 
+              alt={locale === 'pt' ? 'Interiores históricos do Palacium' : 'Historic Palacium interiors'}
               loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-[3s] hover:scale-105"
+              overlay
+              className="transition-transform duration-[3s] hover:scale-105"
             />
           </div>
           {/* Decorative Elements */}
@@ -61,8 +76,7 @@ const Introduction: React.FC<IntroductionProps> = ({ navigateTo }) => {
           </div>
         </div>
 
-      </div>
-    </section>
+    </Section>
   );
 };
 

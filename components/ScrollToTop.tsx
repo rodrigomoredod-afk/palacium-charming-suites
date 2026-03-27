@@ -1,8 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronUp } from 'lucide-react';
+import { useLocale } from '../contexts/LocaleContext';
 
 const ScrollToTop: React.FC = () => {
+  const { locale } = useLocale();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -33,9 +35,9 @@ const ScrollToTop: React.FC = () => {
     <button
       type="button"
       onClick={scrollToTop}
-      aria-label="Voltar ao topo"
+      aria-label={locale === 'pt' ? 'Voltar ao topo' : 'Back to top'}
       className={`
-        fixed bottom-6 right-6 z-[120] md:hidden
+        fixed bottom-6 right-6 z-[120]
         bg-gold text-white p-3 rounded-full shadow-2xl
         transition-all duration-500 ease-out transform
         active:scale-90

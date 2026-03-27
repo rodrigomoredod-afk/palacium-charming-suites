@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import { DataProvider } from './contexts/DataContext.tsx';
+import { LocaleProvider } from './contexts/LocaleContext.tsx';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -12,8 +13,10 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <DataProvider>
-      <App />
-    </DataProvider>
+    <LocaleProvider>
+      <DataProvider>
+        <App />
+      </DataProvider>
+    </LocaleProvider>
   </React.StrictMode>
 );

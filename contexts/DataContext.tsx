@@ -1,7 +1,12 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { SUITES as INITIAL_SUITES, REVIEWS as INITIAL_REVIEWS, GUEST_SCORE } from '../constants';
-import { Suite, Review, Reservation } from '../types';
+import {
+  SUITES as INITIAL_SUITES,
+  REVIEWS as INITIAL_REVIEWS,
+  GUEST_SCORE,
+  INITIAL_SITE_CONTENT,
+} from '../constants';
+import { Suite, Review, Reservation, SiteContent } from '../types';
 
 interface DataContextType {
   suites: Suite[];
@@ -18,6 +23,8 @@ interface DataContextType {
   updateReservation: (id: string, patch: Partial<Reservation>) => void;
   deleteReservation: (id: string) => void;
   setBookingDisplayScore: (score: number) => void;
+  siteContent: SiteContent;
+  updateHeroContent: (locale: 'pt' | 'en', patch: Partial<SiteContent['hero']['pt']>) => void;
   resetData: () => void;
 }
 
@@ -69,6 +76,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return GUEST_SCORE;
   });
 
+  const [siteContent, setSiteContent] = useState<SiteContent>(() => {
+    const saved = localStorage.getItem('palacium_site_content_v1');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Error parsing saved site content', e);
+      }
+    }
+    return INITIAL_SITE_CONTENT;
+  });
+
   useEffect(() => {
     localStorage.setItem('palacium_suites_data_v2', JSON.stringify(suites));
   }, [suites]);
@@ -84,6 +103,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem('palacium_booking_score_v1', String(bookingDisplayScore));
   }, [bookingDisplayScore]);
+
+  useEffect(() => {
+    localStorage.setItem('palacium_site_content_v1', JSON.stringify(siteContent));
+  }, [siteContent]);
 
   const updateSuitePrice = (id: string, newPrice: number) => {
     setSuites(prev => prev.map(suite => 
@@ -131,11 +154,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setBookingDisplayScoreState(Math.round(n * 10) / 10);
   };
 
+  const updateHeroContent: DataContextType['updateHeroContent'] = (locale, patch) => {
+    setSiteContent((prev) => ({
+      ...prev,
+      hero: {
+        ...prev.hero,
+        [locale]: {
+          ...prev.hero[locale],
+          ...patch,
+        },
+      },
+    }));
+  };
+
   const resetData = () => {
     setSuites(INITIAL_SUITES);
     setReviews(INITIAL_REVIEWS);
+    setSiteContent(INITIAL_SITE_CONTENT);
     localStorage.removeItem('palacium_suites_data_v2');
     localStorage.removeItem('palacium_reviews_data_v1');
+    localStorage.removeItem('palacium_site_content_v1');
   };
 
   return (
@@ -145,6 +183,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         reviews,
         reservations,
         bookingDisplayScore,
+        siteContent,
         updateSuitePrice,
         addReview,
         deleteReview,
@@ -152,6 +191,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateReservation,
         deleteReservation,
         setBookingDisplayScore,
+        updateHeroContent,
         resetData,
       }}
     >

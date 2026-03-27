@@ -9,6 +9,8 @@ export interface InitialBookingData {
   guests?: string;
 }
 
+export type Locale = 'pt' | 'en';
+
 export interface Suite {
   id: string;
   name: string;
@@ -37,7 +39,7 @@ export type ReservationSource =
   | 'walk_in'
   | 'other';
 
-export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled';
+export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 
 export interface Reservation {
   id: string;
@@ -60,6 +62,18 @@ export interface Reservation {
   externalRef?: string;
   createdAt: string;
   updatedAt?: string;
+}
+
+export interface HeroContent {
+  badge: string;
+  title: string;
+  subtitle: string;
+  galleryCta: string;
+  discoverLabel: string;
+}
+
+export interface SiteContent {
+  hero: Record<Locale, HeroContent>;
 }
 
 export interface FeatureIcon {

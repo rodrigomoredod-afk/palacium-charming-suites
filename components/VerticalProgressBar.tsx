@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface Section {
   id: string;
@@ -7,17 +8,18 @@ interface Section {
 }
 
 const VerticalProgressBar: React.FC = () => {
+  const { locale } = useLocale();
   const [scrollPercent, setScrollPercent] = useState(0);
   const [activeSection, setActiveSection] = useState('');
   const requestRef = useRef<number>(null);
 
   const sections: Section[] = useMemo(() => [
-    { id: 'hero', title: 'Bem-Vindo' },
-    { id: 'heritage', title: 'Nossa História' },
-    { id: 'suites', title: 'Suites Reais' },
-    { id: 'reviews', title: 'Críticas' },
-    { id: 'cta', title: 'Reserve Já' }
-  ], []);
+    { id: 'hero', title: locale === 'pt' ? 'Bem-Vindo' : 'Welcome' },
+    { id: 'heritage', title: locale === 'pt' ? 'Nossa Historia' : 'Our Story' },
+    { id: 'suites', title: locale === 'pt' ? 'Suites Reais' : 'Royal Suites' },
+    { id: 'reviews', title: locale === 'pt' ? 'Criticas' : 'Reviews' },
+    { id: 'cta', title: locale === 'pt' ? 'Reserve Ja' : 'Book Now' }
+  ], [locale]);
 
   const updateScroll = () => {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -54,16 +56,16 @@ const VerticalProgressBar: React.FC = () => {
 
   useEffect(() => {
     requestRef.current = requestAnimationFrame(updateScroll);
-    
-    // Also listen to resize to handle orientation changes correctly
-    window.addEventListener('resize', () => {
-       if (requestRef.current) cancelAnimationFrame(requestRef.current);
-       requestRef.current = requestAnimationFrame(updateScroll);
-    });
+
+    const handleResize = () => {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      requestRef.current = requestAnimationFrame(updateScroll);
+    };
+    window.addEventListener('resize', handleResize);
 
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
-      window.removeEventListener('resize', updateScroll);
+      window.removeEventListener('resize', handleResize);
     };
   }, [sections]);
 

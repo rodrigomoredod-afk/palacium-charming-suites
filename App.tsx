@@ -20,12 +20,19 @@ import BookingModal from './components/BookingModal.tsx';
 import VerticalProgressBar from './components/VerticalProgressBar.tsx';
 import ScrollToTop from './components/ScrollToTop.tsx';
 import { ViewType, InitialBookingData } from './types.ts';
+import { useLocale } from './contexts/LocaleContext.tsx';
+import { trackEvent } from './lib/analytics.ts';
 
 const App: React.FC = () => {
+  const { locale } = useLocale();
   const [scrolled, setScrolled] = useState(false);
   const [view, setView] = useState<ViewType>('home');
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [initialBookingData, setInitialBookingData] = useState<InitialBookingData>({});
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,6 +53,7 @@ const App: React.FC = () => {
 
   const navigateTo = (newView: ViewType) => {
     setView(newView);
+    trackEvent('page_view', { view: newView, locale });
     window.scrollTo(0, 0);
   };
 
@@ -95,7 +103,9 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen selection:bg-gold/30 flex flex-col">
-      <a href="#main-content" className="skip-link">Pular para o conteúdo principal</a>
+      <a href="#main-content" className="skip-link">
+        {locale === 'pt' ? 'Pular para o conteudo principal' : 'Skip to main content'}
+      </a>
       {/* Hide Header on Admin Page */}
       {view !== 'admin' && (
         <Header 

@@ -1,6 +1,7 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { MapPin, Navigation } from 'lucide-react';
+import { useLocale } from '../contexts/LocaleContext';
 
 // Declaration to satisfy TS since we are using CDN
 declare const L: any;
@@ -54,8 +55,28 @@ const LOCATIONS = [
 ];
 
 const Map: React.FC = () => {
+  const { locale } = useLocale();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+
+  const localizedLocations = useMemo(() => {
+    return LOCATIONS.map((loc) => {
+      if (locale === 'pt') return loc;
+
+      const descriptionById: Record<string, string> = {
+        palacium: 'Your luxury retreat.',
+        paris: 'Local Accommodation (Snack-Bar Coming Soon).',
+        renatos: 'Local convent pastry.',
+        tricana: 'Traditional flavors.',
+        jardim: 'The town green heart.',
+      };
+
+      return {
+        ...loc,
+        desc: descriptionById[loc.id] ?? loc.desc,
+      };
+    });
+  }, [locale]);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
@@ -109,7 +130,7 @@ const Map: React.FC = () => {
     };
 
     // Add Markers
-    LOCATIONS.forEach(loc => {
+    localizedLocations.forEach(loc => {
       const size = loc.type === 'main' ? 'large' : loc.type === 'highlight' ? 'medium' : 'small';
       const marker = L.marker([loc.lat, loc.lng], {
         icon: createCustomIcon(loc.color, size)
@@ -122,7 +143,7 @@ const Map: React.FC = () => {
           <p class="text-[10px] uppercase tracking-widest text-gray-500 mb-3">${loc.desc}</p>
           ${loc.type !== 'poi' ? `
             <a href="https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}" target="_blank" class="inline-block bg-charcoal text-white text-[9px] uppercase tracking-widest px-4 py-2 rounded-sm hover:bg-gold transition-colors">
-              Como Chegar
+              ${locale === 'pt' ? 'Como Chegar' : 'Directions'}
             </a>
           ` : ''}
         </div>
@@ -143,7 +164,7 @@ const Map: React.FC = () => {
         mapInstanceRef.current = null;
       }
     };
-  }, []);
+  }, [localizedLocations, locale]);
 
   return (
     <section className="relative h-[600px] w-full bg-bone border-t border-charcoal/5">
@@ -156,21 +177,29 @@ const Map: React.FC = () => {
                <Navigation className="w-6 h-6" />
             </div>
             <div>
-               <span className="text-gold uppercase tracking-[0.3em] text-[10px] font-bold block mb-2">Localização</span>
-               <h3 className="font-serif text-2xl text-charcoal">No Coração de <br/><span className="italic">Figueiró.</span></h3>
+               <span className="text-gold uppercase tracking-[0.3em] text-[10px] font-bold block mb-2">
+                 {locale === 'pt' ? 'Localizacao' : 'Location'}
+               </span>
+               <h3 className="font-serif text-2xl text-charcoal">
+                 {locale === 'pt' ? 'No Coracao de' : 'In the Heart of'} <br/><span className="italic">Figueiro.</span>
+               </h3>
             </div>
           </div>
           <p className="text-charcoal/60 text-sm leading-relaxed mb-6">
-             Estrategicamente posicionado para explorar as Aldeias do Xisto e as praias fluviais do Zêzere, com a melhor gastronomia a poucos passos de distância.
+             {locale === 'pt'
+               ? 'Estrategicamente posicionado para explorar as Aldeias do Xisto e as praias fluviais do Zezere, com a melhor gastronomia a poucos passos.'
+               : 'Strategically positioned to explore the Schist Villages and the Zezere river beaches, with top local gastronomy just steps away.'}
           </p>
           <div className="space-y-3">
              <div className="flex items-center gap-3">
                 <MapPin className="w-4 h-4 text-gold" />
-                <span className="text-xs font-bold text-charcoal">R. Teófilo Braga 85, Figueiró dos Vinhos</span>
+                <span className="text-xs font-bold text-charcoal">R. Teofilo Braga 85, Figueiro dos Vinhos</span>
              </div>
              <div className="flex items-center gap-3">
                 <div className="w-4 h-4 rounded-full bg-charcoal"></div>
-                <span className="text-xs font-bold text-charcoal">400m do Paris by Palacium Group</span>
+                <span className="text-xs font-bold text-charcoal">
+                  {locale === 'pt' ? '400m do Paris by Palacium Group' : '400m from Paris by Palacium Group'}
+                </span>
              </div>
           </div>
        </div>
