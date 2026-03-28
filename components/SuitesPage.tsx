@@ -1,21 +1,19 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useData } from '../contexts/DataContext';
 import { Suite, ViewType } from '../types';
 import { Users, Maximize, ArrowLeft } from 'lucide-react';
 import { useLocale } from '../contexts/LocaleContext';
-import SuiteDetailsDrawer from './SuiteDetailsDrawer';
 
 interface SuitesPageProps {
   navigateTo: (view: ViewType) => void;
   openBooking: () => void;
+  openSuiteDetails: (suite: Suite) => void;
 }
 
-const SuitesPage: React.FC<SuitesPageProps> = ({ navigateTo, openBooking }) => {
+const SuitesPage: React.FC<SuitesPageProps> = ({ navigateTo, openBooking, openSuiteDetails }) => {
   const { suites } = useData();
   const { locale } = useLocale();
-  const [selectedSuite, setSelectedSuite] = useState<Suite | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const suiteDescriptionEn: Record<string, string> = {
     '101': 'Ground floor. Designed for universal accessibility with adapted bathroom layout and generous circulation space, while preserving the 1905 elegance.',
@@ -26,15 +24,6 @@ const SuitesPage: React.FC<SuitesPageProps> = ({ navigateTo, openBooking }) => {
     '203': 'Upper floor. Imperial 40m² suite where natural light highlights architectural heritage.',
     '205': 'Upper floor. Privileged views and refined design with integrated lounge area and premium finishes.',
     '206': 'Upper floor. The pinnacle of Deluxe elegance, with 28m² bathed in natural light.',
-  };
-
-  const openSuiteDetails = (suite: Suite) => {
-    setSelectedSuite(suite);
-    setIsDetailsOpen(true);
-  };
-
-  const closeSuiteDetails = () => {
-    setIsDetailsOpen(false);
   };
 
   return (
@@ -105,16 +94,6 @@ const SuitesPage: React.FC<SuitesPageProps> = ({ navigateTo, openBooking }) => {
           ))}
         </div>
       </div>
-      <SuiteDetailsDrawer
-        suite={selectedSuite}
-        locale={locale}
-        isOpen={isDetailsOpen}
-        onClose={closeSuiteDetails}
-        onBook={() => {
-          closeSuiteDetails();
-          openBooking();
-        }}
-      />
     </div>
   );
 };

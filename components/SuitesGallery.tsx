@@ -2,7 +2,7 @@
 import React, { useMemo } from 'react';
 import { useData } from '../contexts/DataContext';
 import { ArrowRight, UtensilsCrossed, Plus } from 'lucide-react';
-import { ViewType } from '../types';
+import { Suite, ViewType } from '../types';
 import Section from './ui/Section';
 import SmartImage from './ui/SmartImage';
 import { useLocale } from '../contexts/LocaleContext';
@@ -10,9 +10,10 @@ import { useLocale } from '../contexts/LocaleContext';
 interface SuitesGalleryProps {
   navigateTo: (view: ViewType) => void;
   openBooking: () => void;
+  openSuiteDetails: (suite: Suite) => void;
 }
 
-const SuitesGallery: React.FC<SuitesGalleryProps> = ({ navigateTo, openBooking }) => {
+const SuitesGallery: React.FC<SuitesGalleryProps> = ({ navigateTo, openBooking, openSuiteDetails }) => {
   const { suites } = useData();
   const { locale } = useLocale();
   const suiteDescriptionEn: Record<string, string> = {
@@ -68,12 +69,26 @@ const SuitesGallery: React.FC<SuitesGalleryProps> = ({ navigateTo, openBooking }
                 overlay
                 className="transition-transform duration-[2s] ease-out group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-charcoal/40 opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex flex-col justify-end p-8">
-                <button 
-                  onClick={openBooking}
+              <div className="absolute inset-0 bg-charcoal/40 opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex flex-col justify-end gap-3 p-8">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openBooking();
+                  }}
                   className="w-full bg-white text-charcoal py-4 uppercase text-[9px] tracking-[0.3em] font-bold transform translate-y-10 group-hover:translate-y-0 transition-transform duration-500 hover:bg-gold hover:text-white rounded-none"
                 >
                   {locale === 'pt' ? 'Reservar Suite' : 'Reserve Suite'}
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openSuiteDetails(suite);
+                  }}
+                  className="w-full border border-white/40 text-white py-3 uppercase text-[9px] tracking-[0.3em] font-bold transform translate-y-10 group-hover:translate-y-0 transition-transform duration-500 delay-75 hover:bg-white hover:text-charcoal rounded-none"
+                >
+                  {locale === 'pt' ? 'Detalhes' : 'Details'}
                 </button>
               </div>
             </div>
@@ -95,6 +110,13 @@ const SuitesGallery: React.FC<SuitesGalleryProps> = ({ navigateTo, openBooking }
                     <UtensilsCrossed className="w-3 h-3 text-gold" />
                     <span className="text-[8px] uppercase tracking-[0.2em] font-bold text-charcoal">{locale === 'pt' ? 'Pequeno-almoço incluído' : 'Breakfast included'}</span>
                  </div>
+                 <button
+                   type="button"
+                   onClick={() => openSuiteDetails(suite)}
+                   className="md:hidden self-start text-[9px] uppercase tracking-[0.25em] font-bold text-gold border-b border-gold/30 pb-0.5 mt-1 hover:border-gold transition-colors"
+                 >
+                   {locale === 'pt' ? 'Ver detalhes da suíte' : 'View suite details'}
+                 </button>
               </div>
             </div>
           </div>

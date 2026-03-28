@@ -17,9 +17,10 @@ import AboutUs from './components/AboutUs.tsx';
 import Gallery from './components/Gallery.tsx';
 import AdminPanel from './components/AdminPanel.tsx';
 import BookingModal from './components/BookingModal.tsx';
+import SuiteDetailsDrawer from './components/SuiteDetailsDrawer.tsx';
 import VerticalProgressBar from './components/VerticalProgressBar.tsx';
 import ScrollToTop from './components/ScrollToTop.tsx';
-import { ViewType, InitialBookingData } from './types.ts';
+import { ViewType, InitialBookingData, Suite } from './types.ts';
 import { useLocale } from './contexts/LocaleContext.tsx';
 import { trackEvent } from './lib/analytics.ts';
 
@@ -29,6 +30,8 @@ const App: React.FC = () => {
   const [view, setView] = useState<ViewType>('home');
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [initialBookingData, setInitialBookingData] = useState<InitialBookingData>({});
+  const [suiteDetailsSuite, setSuiteDetailsSuite] = useState<Suite | null>(null);
+  const [isSuiteDetailsOpen, setIsSuiteDetailsOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -68,6 +71,13 @@ const App: React.FC = () => {
   
   const closeBooking = () => setIsBookingOpen(false);
 
+  const openSuiteDetails = (suite: Suite) => {
+    setSuiteDetailsSuite(suite);
+    setIsSuiteDetailsOpen(true);
+  };
+
+  const closeSuiteDetails = () => setIsSuiteDetailsOpen(false);
+
   const renderView = () => {
     switch (view) {
       case 'home':
@@ -77,7 +87,11 @@ const App: React.FC = () => {
             <Hero navigateTo={navigateTo} openBooking={openBooking} />
             <Introduction navigateTo={navigateTo} />
             <Amenities />
-            <SuitesGallery navigateTo={navigateTo} openBooking={openBooking} />
+            <SuitesGallery
+              navigateTo={navigateTo}
+              openBooking={openBooking}
+              openSuiteDetails={openSuiteDetails}
+            />
             <Testimonials />
             <Partners />
             <Map />
@@ -87,7 +101,13 @@ const App: React.FC = () => {
       case 'history':
         return <History navigateTo={navigateTo} />;
       case 'suites':
-        return <SuitesPage navigateTo={navigateTo} openBooking={openBooking} />;
+        return (
+          <SuitesPage
+            navigateTo={navigateTo}
+            openBooking={openBooking}
+            openSuiteDetails={openSuiteDetails}
+          />
+        );
       case 'experiences':
         return <Experiences navigateTo={navigateTo} />;
       case 'about':
@@ -127,6 +147,19 @@ const App: React.FC = () => {
         onClose={closeBooking} 
         initialData={initialBookingData}
       />
+
+      {view !== 'admin' && (
+        <SuiteDetailsDrawer
+          suite={suiteDetailsSuite}
+          locale={locale}
+          isOpen={isSuiteDetailsOpen}
+          onClose={closeSuiteDetails}
+          onBook={() => {
+            closeSuiteDetails();
+            openBooking();
+          }}
+        />
+      )}
     </div>
   );
 };
