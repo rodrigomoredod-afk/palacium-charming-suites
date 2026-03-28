@@ -74,6 +74,11 @@ const App: React.FC = () => {
   const openSuiteDetails = (suite: Suite) => {
     setSuiteDetailsSuite(suite);
     setIsSuiteDetailsOpen(true);
+    trackEvent('suite_details_open', {
+      suiteId: suite.id,
+      locale,
+      view,
+    });
   };
 
   const closeSuiteDetails = () => setIsSuiteDetailsOpen(false);
