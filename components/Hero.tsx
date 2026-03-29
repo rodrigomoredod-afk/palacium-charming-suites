@@ -63,7 +63,9 @@ const BookingBarContent: React.FC<BookingBarContentProps> = ({
       >
         <div className={`px-6 py-4 md:px-8 md:py-5 flex items-center justify-between`}>
           <div className="space-y-1">
-            <label className="block text-[8px] uppercase tracking-[0.4em] text-gold font-black">Check-in</label>
+            <label className="block text-[8px] uppercase tracking-[0.4em] text-gold font-black">
+              {locale === 'pt' ? 'Entrada' : 'Check-in'}
+            </label>
             <div className="flex items-center gap-2">
               <Calendar className="w-3.5 h-3.5 text-gold/50" />
               <span className="text-sm md:text-base text-white font-medium [font-variant-numeric:lining-nums]">
@@ -92,7 +94,9 @@ const BookingBarContent: React.FC<BookingBarContentProps> = ({
       >
         <div className={`px-6 py-4 md:px-8 md:py-5 flex items-center justify-between`}>
           <div className="space-y-1">
-            <label className="block text-[8px] uppercase tracking-[0.4em] text-gold font-black">Check-out</label>
+            <label className="block text-[8px] uppercase tracking-[0.4em] text-gold font-black">
+              {locale === 'pt' ? 'Saída' : 'Check-out'}
+            </label>
             <div className="flex items-center gap-2">
               <Calendar className="w-3.5 h-3.5 text-gold/50" />
               <span className="text-sm md:text-base text-white font-medium [font-variant-numeric:lining-nums]">

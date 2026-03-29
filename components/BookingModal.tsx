@@ -511,11 +511,15 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialDat
                 <div className="bg-white border border-charcoal/5 p-6 md:p-14 rounded-sm shadow-2xl space-y-10 md:space-y-16 relative">
                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 border-b border-charcoal/5 pb-10 relative z-10">
                       <div>
-                        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-gold font-black block mb-2">Check-in</span>
+                        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-gold font-black block mb-2">
+                          {isPt ? 'Entrada' : 'Check-in'}
+                        </span>
                         <span className="text-sm md:text-lg font-serif [font-variant-numeric:lining-nums]">{formatDateDisplay(checkIn)}</span>
                       </div>
                       <div>
-                        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-gold font-black block mb-2">Check-out</span>
+                        <span className="text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-gold font-black block mb-2">
+                          {isPt ? 'Saída' : 'Check-out'}
+                        </span>
                         <span className="text-sm md:text-lg font-serif [font-variant-numeric:lining-nums]">{formatDateDisplay(checkOut)}</span>
                       </div>
                       <div>
