@@ -140,7 +140,9 @@ const Testimonials: React.FC = () => {
                 <div className="flex gap-1 justify-center mb-2">
                   {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-gold text-gold" />)}
                 </div>
-                <span className="text-[10px] uppercase tracking-[0.3em] font-black text-white/20 whitespace-nowrap">Official Booking Score</span>
+                <span className="text-[10px] uppercase tracking-[0.3em] font-black text-white/20 whitespace-nowrap">
+                  {locale === 'pt' ? 'Pontuação Booking.com' : 'Booking.com score'}
+                </span>
               </div>
 
               <div className="flex-grow w-full space-y-3.5">

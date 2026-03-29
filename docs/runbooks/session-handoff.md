@@ -1,12 +1,12 @@
 # Session Handoff
 
-Last updated: 2026-03-26
+Last updated: 2026-03-29
 
 ## Latest Sync Status
 
 - Git sync: changes committed and pushed to `origin/main`
-- Commit: `22ba30c` — "Finalize PT/EN localization polish and fix SmartImage typing"
-- Dev server note from this session: Vite was running on `http://localhost:3001/` (port 3000 was busy)
+- Recent highlights: suite details drawer (`suiteDetails.ts`), drawer lifted to `App` with home gallery CTAs, `suite_details_open` analytics event
+- Dev server: Vite default `http://localhost:3000/` (use `npm run dev` if port is free)
 
 ## Current Project Phase
 
@@ -16,6 +16,8 @@ Last updated: 2026-03-26
 
 ## What Was Completed
 
+- Suite details experience: PT/EN content model, drawer from Suites page and home featured suites (hover + mobile link), shared instance via `App`
+- Image / local SEO reference: `docs/ops/images-and-local-seo.md`
 - Full public PT/EN localization pass across:
   - Header, Footer, Hero, Introduction, Amenities, SuitesGallery, Testimonials, Partners, Map, FinalCTA
   - Standalone pages: History, Suites, Experiences, About, Gallery

@@ -51,13 +51,20 @@ const SuiteDetailsDrawer: React.FC<SuiteDetailsDrawerProps> = ({
         className="absolute inset-0 bg-charcoal/60 backdrop-blur-sm"
       />
 
-      <aside className="absolute right-0 top-0 h-full w-full md:w-[640px] bg-bone shadow-2xl overflow-y-auto">
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="suite-details-title"
+        className="absolute right-0 top-0 h-full w-full md:w-[640px] bg-bone shadow-2xl overflow-y-auto outline-none"
+      >
         <div className="sticky top-0 z-10 bg-bone/95 backdrop-blur-sm border-b border-charcoal/10 px-5 md:px-8 py-4 md:py-5 flex items-center justify-between">
           <div>
             <p className="text-[10px] uppercase tracking-[0.28em] text-gold font-black">
               {locale === 'pt' ? 'Detalhes da Suíte' : 'Suite Details'}
             </p>
-            <h3 className="font-serif text-xl md:text-3xl text-charcoal mt-1">{suite.name}</h3>
+            <h3 id="suite-details-title" className="font-serif text-xl md:text-3xl text-charcoal mt-1">
+              {suite.name}
+            </h3>
           </div>
           <button
             type="button"
