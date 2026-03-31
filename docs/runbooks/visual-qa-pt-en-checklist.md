@@ -73,6 +73,13 @@ Example:
 - Price line and breakfast label localized.
 - CTA labels fit and remain readable.
 
+### Suite Details Drawer (from home gallery)
+
+- Opens from featured suite CTAs (hover affordance on desktop; link/tap on mobile).
+- Title, body, amenities, and CTAs are localized in PT/EN.
+- Close control (backdrop, Esc, or button) works without breaking scroll.
+- No mixed-language copy inside the drawer.
+
 ### Testimonials
 
 - Header and helper labels localized.
@@ -102,6 +109,10 @@ Example:
 - Hero intro copy localized.
 - Suite descriptions localized in EN.
 - CTA texts localized and aligned.
+
+### Suite Details Drawer (from Suites page)
+
+- Same checks as home gallery drawer; content matches suite context.
 
 ### Experiences Page
 
@@ -147,13 +158,14 @@ Checks:
 
 | Area | PT | EN | Notes |
 |---|---|---|---|
-| Home |  |  |  |
+| Home | ✅ | ✅ | Hero booking-bar mobile tracking tightened (design-freeze-safe); labels/CTA localization verified. |
 | Suites |  |  |  |
 | Experiences |  |  |  |
 | About |  |  |  |
 | Gallery |  |  |  |
 | History |  |  |  |
 | Booking Modal |  |  |  |
+| Suite Details Drawer |  |  |  |
 | Global Header/Footer |  |  |  |
 
 ## Exit Criteria

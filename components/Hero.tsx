@@ -1,16 +1,15 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Calendar, Users, ChevronDown, ImageIcon, Search, ArrowRight, Check } from 'lucide-react';
 import { heroSlideshow } from '../images';
 import { ViewType, InitialBookingData } from '../types';
 import { useLocale } from '../contexts/LocaleContext';
+import { useData } from '../contexts/DataContext';
 
 interface HeroProps {
   navigateTo: (view: ViewType) => void;
   openBooking: (data?: InitialBookingData) => void;
 }
-
-const HERO_IMAGES = heroSlideshow;
 
 // Standalone component to prevent unmounting issues on state changes
 interface BookingBarContentProps {
@@ -63,7 +62,7 @@ const BookingBarContent: React.FC<BookingBarContentProps> = ({
       >
         <div className={`px-6 py-4 md:px-8 md:py-5 flex items-center justify-between`}>
           <div className="space-y-1">
-            <label className="block text-[8px] uppercase tracking-[0.4em] text-gold font-black">
+            <label className="block text-[8px] uppercase tracking-[0.24em] md:tracking-[0.4em] text-gold font-black">
               {locale === 'pt' ? 'Entrada' : 'Check-in'}
             </label>
             <div className="flex items-center gap-2">
@@ -94,7 +93,7 @@ const BookingBarContent: React.FC<BookingBarContentProps> = ({
       >
         <div className={`px-6 py-4 md:px-8 md:py-5 flex items-center justify-between`}>
           <div className="space-y-1">
-            <label className="block text-[8px] uppercase tracking-[0.4em] text-gold font-black">
+            <label className="block text-[8px] uppercase tracking-[0.24em] md:tracking-[0.4em] text-gold font-black">
               {locale === 'pt' ? 'Saída' : 'Check-out'}
             </label>
             <div className="flex items-center gap-2">
@@ -125,7 +124,7 @@ const BookingBarContent: React.FC<BookingBarContentProps> = ({
           }}
         >
           <div className="space-y-1">
-            <label className="block text-[8px] uppercase tracking-[0.4em] text-gold font-black">
+            <label className="block text-[8px] uppercase tracking-[0.24em] md:tracking-[0.4em] text-gold font-black">
               {locale === 'pt' ? 'Comitiva' : 'Guests'}
             </label>
             <div className="flex items-center gap-2">
@@ -194,7 +193,7 @@ const BookingBarContent: React.FC<BookingBarContentProps> = ({
             }
           `}
         >
-          <span className="text-[10px] tracking-[0.3em]">
+          <span className="text-[10px] tracking-[0.18em] md:tracking-[0.3em] whitespace-nowrap">
             {isStickyVersion
               ? (locale === 'pt' ? 'Reservar' : 'Book')
               : (locale === 'pt' ? 'Consultar' : 'Search')}
@@ -208,6 +207,15 @@ const BookingBarContent: React.FC<BookingBarContentProps> = ({
 
 const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
   const { locale } = useLocale();
+  const { siteContent } = useData();
+  const slideshowImages = useMemo(() => {
+    const o = siteContent.heroSlideshowOverride;
+    if (o && o.length > 0) {
+      const filtered = o.map((u) => u.trim()).filter(Boolean);
+      if (filtered.length > 0) return filtered;
+    }
+    return heroSlideshow;
+  }, [siteContent.heroSlideshowOverride]);
   const [scrollY, setScrollY] = useState(0);
   const [isSticky, setIsSticky] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -256,11 +264,17 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
   }, []);
 
   useEffect(() => {
+    if (slideshowImages.length === 0) return;
+    setCurrentImageIndex((prev) => prev % slideshowImages.length);
+  }, [slideshowImages]);
+
+  useEffect(() => {
+    if (slideshowImages.length === 0) return;
     const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % HERO_IMAGES.length);
+      setCurrentImageIndex((prev) => (prev + 1) % slideshowImages.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, []);
+  }, [slideshowImages]);
 
   const handleCheckInChange = (val: string) => {
     setCheckIn(val);
@@ -298,9 +312,9 @@ const Hero: React.FC<HeroProps> = ({ navigateTo, openBooking }) => {
         
         {/* Background Slider */}
         <div className="absolute inset-0 z-0 bg-charcoal">
-          {HERO_IMAGES.map((img, index) => (
+          {slideshowImages.map((img, index) => (
             <div
-              key={img}
+              key={`${index}-${img}`}
               className={`absolute inset-0 transition-opacity duration-[2000ms] ease-in-out ${
                 index === currentImageIndex ? 'opacity-100' : 'opacity-0'
               }`}
