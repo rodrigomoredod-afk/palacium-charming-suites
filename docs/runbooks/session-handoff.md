@@ -1,72 +1,66 @@
 # Session Handoff
 
-Last updated: 2026-03-30
+Last updated: 2026-03-31 — Admin tarifário sazonal, sugestão de totais, editar reservas
 
 ## Latest Sync Status
 
-- Git sync: changes committed and pushed to `origin/main`
-- Recent highlights: suite details drawer (`suiteDetails.ts`), drawer lifted to `App` with home gallery CTAs, `suite_details_open` analytics event
-- Dev server: Vite default `http://localhost:3000/` (use `npm run dev` if port is free)
-- Admin auth reminder: production/local admin login uses `ADMIN_USERS_JSON` (env var) via `api/admin-login.ts`
+- **Git:** confirm with `git status` / `git log` before assuming pushed; user may have local commits.
+- **Dev servers:**
+  - **`npm run dev`** — Vite only, **no `/api`** (Área Reservada login will show “API not running” unless you use the other command).
+  - **`npm run dev:vercel`** — site + **`/api`** (admin login, health, reservations). Default **http://localhost:3000/**
+  - **Never** set `package.json` `"dev"` to `vercel dev` — Vercel invokes `npm run dev` and it **recurses** (CLI error).
+- **MySQL migration:** In progress; see **`docs/prompts/mysql-migration-ticket-pack.md`**. Tickets **1–8** largely implemented (pool, migrations, seed, DB login, JWT optional, reservations → MySQL, **`GET /api/site-data`** + admin writes when `VITE_ENABLE_SITE_DATA_API` + `SESSION_SECRET` / JWT).
+- **Área Reservada — Tarifas:**
+  - Calendário sazonal: períodos com €/noite por intervalo; **edição em massa** (várias suites no mesmo período) em **`AdminPricingCalendar`**.
+  - Regras em **`localStorage`** `palacium_suite_price_rules_v1`; **`DataContext`**: `suitePriceRules`, `addSuitePriceRule`, `deleteSuitePriceRule`; **`lib/suitePricing.ts`** (noites, preço efetivo, grelha).
+  - **“Restaurar Originais”** nas Tarifas também limpa regras sazonais (confirm atualizado no UI).
+- **Área Reservada — Reservas:**
+  - **Sugestão de total** no formulário (e no modal de edição): suites + datas + tarifário sazonal; botão “Usar sugestão”; suites mostram preço base.
+  - **Editar reserva:** ícone lápis na coluna Ações → modal (Esc / fundo / X); **`updateReservation`**. Perfil **viewer** não vê editar (só admin/superadmin como resto do painel).
+  - Datas manual: **Entrada/Saída** com display **pt-PT** (dd/mm/yyyy) + input nativo invisível; blur após pick para evitar bloqueio no Chrome/Edge.
+- **Auth / API:** inalterado face à ronda anterior — ver bullets anteriores em git para `admin-login`, `SESSION_SECRET`, etc.
+- **Local tooling:** **`scripts/diagnose-env.cmd`**, **`npm run db:verify-admin`**. **Visual QA:** **`docs/runbooks/visual-qa-pt-en-checklist.md`**.
 
 ## Current Project Phase
 
-- Phase: Design Sprint
-- Step: Final Polish and Localization QA
-- Status: Public-facing PT/EN localization and UI polish complete; build/lint passing.
+- **Admin:** tarifário sazonal e reservas editáveis são **só cliente** (localStorage) exceto quando site data API está ligada para suites/conteúdo já descrito no ticket 8.
+- **Backend:** reservas **gravadas na app** ainda sem `PATCH /api/admin/reservations` — edições ficam em `localStorage` até haver API (ticket pack / follow-up).
+- **Público:** modal de reserva no site continua a usar preço **base** da suite; alinhar com tarifário sazonal é próximo passo opcional.
 
-## What Was Completed
+## What Was Completed (cumulative — highlights recentes)
 
-- Suite details experience: PT/EN content model, drawer from Suites page and home featured suites (hover + mobile link), shared instance via `App`
-- Image / local SEO reference: `docs/ops/images-and-local-seo.md`
-- Full public PT/EN localization pass across:
-  - Header, Footer, Hero, Introduction, Amenities, SuitesGallery, Testimonials, Partners, Map, FinalCTA
-  - Standalone pages: History, Suites, Experiences, About, Gallery
-  - Booking modal end-to-end (all steps, messages, labels, CTAs)
-- Mobile/desktop CTA readability polish:
-  - Reduced excessive letter-spacing on mobile and normalized desktop spacing.
-- Vertical progress bar localized (labels now PT/EN).
-- History page discoverability improved:
-  - Added `History/Historia` link to header and footer navigation.
-- Translation consistency improvements:
-  - Amenities data-driven EN items
-  - Suite description EN mappings in suites views
-  - Testimonials nationality/date EN normalization
-  - Map overlay + popup + directions localization
-  - App skip-link localized
+- Suite details drawer, PT/EN, History, MySQL foundation, site-data API (tickets 1–8) — ver histórico em git.
+- **2026-03-30:** `types.SuitePriceRule`, `lib/suitePricing.ts`, **`AdminPricingCalendar`**, sugestão de estadia em **Reservas**, integração `DataContext` + reset.
+- **2026-03-31:** bulk de suites no calendário sazonal; **modal Editar reserva**; cópia da sugestão no modal; coluna **Ações**; handoff atualizado.
 
 ## Validation State
 
-- `npm run build`: passing
-- Lint checks on edited files: passing
-- No intentional behavior changes to critical flows (header scroll logic, booking step logic, auth flow).
+- **`npm run build`** / **`npm run typecheck`** — correr antes de merge.
 
 ## Important Decisions
 
-- Keep `History` page (content is valuable for brand/story positioning).
-- Admin panel remains PT-first (internal tool scope), while public UI is PT/EN complete.
+- Keep **History** page; admin **PT-first**; **`dev`** ≠ `vercel dev` no `package.json`.
+- Sazonalidade: **última regra guardada** (`updatedAt`) ganha em noites sobrepostas na mesma suite.
 
 ## Known Non-Blocking Notes
 
-- Vite chunk size warning still appears in production build (`>500kb`); this is informational and not a release blocker for current scope.
+- Chunk Vite ~500kb: informativo.
+- **`npm run dev:vercel`** pode precisar `npx vercel login` na primeira vez.
 
 ## Next Recommended Actions
 
-1. Run visual QA checklist:
-   - `docs/runbooks/visual-qa-pt-en-checklist.md`
-2. Capture PT/EN screenshots for final sign-off matrix.
-3. If testing Área Reservada now, set/reset `ADMIN_USERS_JSON` and redeploy:
-   - Example shape: `[{"username":"admin","password":"<strong-password>","role":"superadmin"}]`
-   - Production: Vercel Project Settings -> Environment Variables
-   - Local with serverless routes: use `npm run dev:vercel`
-4. Decide sprint closure:
-   - Option A: Freeze design sprint and tag release candidate.
-   - Option B: Minor visual touch-ups only (no architecture changes).
-5. After design sign-off, proceed to MySQL migration plan execution:
-   - `docs/prompts/mysql-migration-ticket-pack.md`
+1. **API (opcional):** persistir `SuitePriceRule` em MySQL + endpoints admin; ou export/import JSON.
+2. **Site público:** usar `effectiveNightlyRate` / `computeSuggestedStayQuote` no **BookingModal** quando datas + suites escolhidas.
+3. **Ticket 9+** (ticket pack): backfill `localStorage` → MySQL; retirar Supabase quando estável.
+4. **Visual QA** e env **Vercel** como no handoff anterior.
 
-## Quick Resume Prompt (for a new chat window)
+## Quick Resume Prompt (paste in a new chat)
 
-Use this exact message:
-
-"Continue from `docs/runbooks/session-handoff.md`. Stay in design freeze mode, do not change critical behavior, run build/lint after edits, and execute the next unchecked item from `docs/runbooks/visual-qa-pt-en-checklist.md`."
+```
+Continue from docs/runbooks/session-handoff.md (and mysql-migration-ticket-pack.md if backend).
+Dev: npm run dev:vercel for /api; npm run dev is Vite-only.
+Admin: Tarifas → calendário sazonal (bulk suites); Reservas → sugestão total + modal Editar.
+Data: palacium_suite_price_rules_v1 in localStorage; site data API still VITE_ENABLE_SITE_DATA_API + SESSION_SECRET for MySQL writes.
+Run npm run typecheck && npm run build after changes.
+Next: optional MySQL for price rules, public booking seasonal rates, or ticket 9 backfill.
+```

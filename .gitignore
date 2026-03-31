@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Secrets (copy from .env.example; never commit real passwords)
+.env
+.env.*
+!.env.example
+login.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +28,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.vercel

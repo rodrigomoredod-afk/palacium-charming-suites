@@ -64,13 +64,13 @@ const History: React.FC<HistoryProps> = ({ navigateTo }) => {
         <div className="relative z-10 px-6 md:px-16 pb-20 max-w-7xl mx-auto w-full">
           <button 
             onClick={() => navigateTo('home')}
-            className="flex items-center gap-2 text-gold text-[10px] uppercase tracking-[0.4em] font-bold mb-12 hover:-translate-x-2 transition-transform"
+            className="inline-flex items-center gap-2 text-charcoal/80 text-[10px] uppercase tracking-[0.32em] font-bold mb-12 px-3 py-2 bg-bone/70 backdrop-blur-sm border border-charcoal/10 hover:-translate-x-2 hover:text-charcoal transition-all"
           >
             <ArrowLeft className="w-4 h-4" /> {locale === 'pt' ? 'Voltar ao Início' : 'Back to Home'}
           </button>
           
           <div className="max-w-4xl scroll-reveal visible">
-            <span className="text-gold uppercase tracking-[0.35em] md:tracking-[0.5em] text-xs font-semibold block mb-6">{locale === 'pt' ? 'A Nossa História' : 'Our Story'}</span>
+            <span className="inline-block text-charcoal/75 uppercase tracking-[0.3em] md:tracking-[0.42em] text-xs font-semibold mb-6 px-3 py-1.5 bg-bone/70 backdrop-blur-sm border border-charcoal/10">{locale === 'pt' ? 'A Nossa História' : 'Our Story'}</span>
             <h1 className="font-serif text-5xl md:text-9xl text-charcoal leading-[0.9] mb-8">
               {locale === 'pt' ? 'Herança' : 'Enduring'} <br /> <span className="italic font-light">{locale === 'pt' ? 'Eterna.' : 'Legacy.'}</span>
             </h1>

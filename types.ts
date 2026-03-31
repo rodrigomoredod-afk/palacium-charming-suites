@@ -1,5 +1,5 @@
 
-import React from 'react';
+import type { ReactNode } from 'react';
 
 export type ViewType = 'home' | 'history' | 'suites' | 'experiences' | 'about' | 'gallery' | 'admin';
 
@@ -19,6 +19,17 @@ export interface Suite {
   area: string;
   description: string;
   price: number;
+}
+
+/** Inclusive date range overriding `Suite.price` for those nights (latest `updatedAt` wins if ranges overlap). */
+export interface SuitePriceRule {
+  id: string;
+  suiteId: string;
+  startDate: string;
+  endDate: string;
+  nightlyPrice: number;
+  note?: string;
+  updatedAt: string;
 }
 
 export interface Review {
@@ -74,11 +85,13 @@ export interface HeroContent {
 
 export interface SiteContent {
   hero: Record<Locale, HeroContent>;
+  /** When non-null and non-empty after trim, replaces the home hero slideshow from `images.ts` */
+  heroSlideshowOverride: string[] | null;
 }
 
 export interface FeatureIcon {
   label: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }
 
 export interface SuiteDetailSpec {

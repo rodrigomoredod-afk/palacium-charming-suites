@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ES2022"],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "types": ["node"],
+    "noEmit": true,
+    "resolveJsonModule": true
+  },
+  "include": ["./**/*.ts", "../data/**/*.ts", "../types.ts", "../images.ts"]
+}

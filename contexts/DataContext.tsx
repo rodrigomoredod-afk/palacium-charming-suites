@@ -6,7 +6,54 @@ import {
   GUEST_SCORE,
   INITIAL_SITE_CONTENT,
 } from '../constants';
-import { Suite, Review, Reservation, SiteContent } from '../types';
+import { mergeSiteContent } from '../lib/siteContentMerge';
+import { readAuthToken } from '../lib/auth';
+import {
+  fetchSiteData,
+  patchAdminSuite,
+  postAdminReview,
+  deleteAdminReview,
+  putAdminSiteContent,
+  putAdminBookingScore,
+} from '../lib/siteDataApi';
+import type { Suite, Review, Reservation, SiteContent, SuitePriceRule } from '../types';
+
+const SITE_DATA_API =
+  typeof import.meta.env !== 'undefined' && import.meta.env.VITE_ENABLE_SITE_DATA_API === 'true';
+
+const SUITE_PRICE_RULES_KEY = 'palacium_suite_price_rules_v1';
+
+function parseSuitePriceRules(raw: unknown): SuitePriceRule[] {
+  if (!Array.isArray(raw)) return [];
+  const out: SuitePriceRule[] = [];
+  for (const x of raw) {
+    if (!x || typeof x !== 'object') continue;
+    const o = x as Record<string, unknown>;
+    if (
+      typeof o.id === 'string' &&
+      typeof o.suiteId === 'string' &&
+      typeof o.startDate === 'string' &&
+      typeof o.endDate === 'string' &&
+      typeof o.nightlyPrice === 'number' &&
+      typeof o.updatedAt === 'string'
+    ) {
+      out.push({
+        id: o.id,
+        suiteId: o.suiteId,
+        startDate: o.startDate,
+        endDate: o.endDate,
+        nightlyPrice: o.nightlyPrice,
+        ...(typeof o.note === 'string' ? { note: o.note } : {}),
+        updatedAt: o.updatedAt,
+      });
+    }
+  }
+  return out;
+}
+
+function syncSiteDataWrites(): boolean {
+  return SITE_DATA_API && readAuthToken() !== null;
+}
 
 interface DataContextType {
   suites: Suite[];
@@ -15,6 +62,7 @@ interface DataContextType {
   /** Shown on site as “official” Booking-style score; update manually or sync later from PMS/API */
   bookingDisplayScore: number;
   updateSuitePrice: (id: string, newPrice: number) => void;
+  updateSuiteImage: (id: string, imageUrl: string) => void;
   addReview: (review: Review) => void;
   deleteReview: (id: string) => void;
   addReservation: (
@@ -25,6 +73,11 @@ interface DataContextType {
   setBookingDisplayScore: (score: number) => void;
   siteContent: SiteContent;
   updateHeroContent: (locale: 'pt' | 'en', patch: Partial<SiteContent['hero']['pt']>) => void;
+  setHeroSlideshowOverride: (urls: string[] | null) => void;
+  /** Sazonalidade: períodos com preço/noite por suite (localStorage). */
+  suitePriceRules: SuitePriceRule[];
+  addSuitePriceRule: (r: Omit<SuitePriceRule, 'id' | 'updatedAt'>) => void;
+  deleteSuitePriceRule: (id: string) => void;
   resetData: () => void;
 }
 
@@ -80,12 +133,24 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const saved = localStorage.getItem('palacium_site_content_v1');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        return mergeSiteContent(JSON.parse(saved));
       } catch (e) {
         console.error('Error parsing saved site content', e);
       }
     }
     return INITIAL_SITE_CONTENT;
+  });
+
+  const [suitePriceRules, setSuitePriceRules] = useState<SuitePriceRule[]>(() => {
+    const saved = localStorage.getItem(SUITE_PRICE_RULES_KEY);
+    if (saved) {
+      try {
+        return parseSuitePriceRules(JSON.parse(saved));
+      } catch (e) {
+        console.error('Error parsing suite price rules', e);
+      }
+    }
+    return [];
   });
 
   useEffect(() => {
@@ -108,18 +173,73 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('palacium_site_content_v1', JSON.stringify(siteContent));
   }, [siteContent]);
 
+  useEffect(() => {
+    localStorage.setItem(SUITE_PRICE_RULES_KEY, JSON.stringify(suitePriceRules));
+  }, [suitePriceRules]);
+
+  useEffect(() => {
+    if (!SITE_DATA_API) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await fetchSiteData();
+        if (cancelled || !data) return;
+        setSuites(data.suites);
+        setReviews(data.reviews);
+        setSiteContent(mergeSiteContent(data.siteContent));
+        setBookingDisplayScoreState(data.bookingDisplayScore);
+      } catch (e) {
+        console.error('[DataContext] site-data', e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const updateSuitePrice = (id: string, newPrice: number) => {
-    setSuites(prev => prev.map(suite => 
-      suite.id === id ? { ...suite, price: newPrice } : suite
-    ));
+    setSuites((prev) =>
+      prev.map((suite) => (suite.id === id ? { ...suite, price: newPrice } : suite)),
+    );
+    if (syncSiteDataWrites()) {
+      void patchAdminSuite(id, { price: newPrice }).catch((e) => console.error('[site-data]', e));
+    }
+  };
+
+  const updateSuiteImage = (id: string, imageUrl: string) => {
+    const trimmed = imageUrl.trim();
+    setSuites((prev) =>
+      prev.map((suite) => (suite.id === id ? { ...suite, image: trimmed } : suite)),
+    );
+    if (syncSiteDataWrites()) {
+      void patchAdminSuite(id, { image: trimmed }).catch((e) => console.error('[site-data]', e));
+    }
+  };
+
+  const setHeroSlideshowOverride: DataContextType['setHeroSlideshowOverride'] = (urls) => {
+    setSiteContent((prev) => ({
+      ...prev,
+      heroSlideshowOverride: urls,
+    }));
+    if (syncSiteDataWrites()) {
+      void putAdminSiteContent({ heroSlideshowOverride: urls }).catch((e) =>
+        console.error('[site-data]', e),
+      );
+    }
   };
 
   const addReview = (review: Review) => {
-    setReviews(prev => [review, ...prev]);
+    setReviews((prev) => [review, ...prev]);
+    if (syncSiteDataWrites()) {
+      void postAdminReview(review).catch((e) => console.error('[site-data]', e));
+    }
   };
 
   const deleteReview = (id: string) => {
-    setReviews(prev => prev.filter(r => r.id !== id));
+    setReviews((prev) => prev.filter((r) => r.id !== id));
+    if (syncSiteDataWrites()) {
+      void deleteAdminReview(id).catch((e) => console.error('[site-data]', e));
+    }
   };
 
   const addReservation: DataContextType['addReservation'] = (incoming) => {
@@ -151,7 +271,24 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setBookingDisplayScore = (score: number) => {
     const n = Math.min(10, Math.max(0, score));
-    setBookingDisplayScoreState(Math.round(n * 10) / 10);
+    const rounded = Math.round(n * 10) / 10;
+    setBookingDisplayScoreState(rounded);
+    if (syncSiteDataWrites()) {
+      void putAdminBookingScore(rounded).catch((e) => console.error('[site-data]', e));
+    }
+  };
+
+  const addSuitePriceRule: DataContextType['addSuitePriceRule'] = (r) => {
+    const id =
+      typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const updatedAt = new Date().toISOString();
+    setSuitePriceRules((prev) => [...prev, { ...r, id, updatedAt }]);
+  };
+
+  const deleteSuitePriceRule: DataContextType['deleteSuitePriceRule'] = (id) => {
+    setSuitePriceRules((prev) => prev.filter((x) => x.id !== id));
   };
 
   const updateHeroContent: DataContextType['updateHeroContent'] = (locale, patch) => {
@@ -165,15 +302,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
       },
     }));
+    if (syncSiteDataWrites()) {
+      void putAdminSiteContent({ hero: { [locale]: patch } }).catch((e) =>
+        console.error('[site-data]', e),
+      );
+    }
   };
 
   const resetData = () => {
     setSuites(INITIAL_SUITES);
     setReviews(INITIAL_REVIEWS);
     setSiteContent(INITIAL_SITE_CONTENT);
+    setSuitePriceRules([]);
     localStorage.removeItem('palacium_suites_data_v2');
     localStorage.removeItem('palacium_reviews_data_v1');
     localStorage.removeItem('palacium_site_content_v1');
+    localStorage.removeItem(SUITE_PRICE_RULES_KEY);
   };
 
   return (
@@ -185,6 +329,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         bookingDisplayScore,
         siteContent,
         updateSuitePrice,
+        updateSuiteImage,
         addReview,
         deleteReview,
         addReservation,
@@ -192,6 +337,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteReservation,
         setBookingDisplayScore,
         updateHeroContent,
+        setHeroSlideshowOverride,
+        suitePriceRules,
+        addSuitePriceRule,
+        deleteSuitePriceRule,
         resetData,
       }}
     >

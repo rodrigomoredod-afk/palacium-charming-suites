@@ -1,3 +1,24 @@
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** True for calendar-normalised YYYY-MM-DD (avoids native `<input type="date">` picker bugs on some browsers). */
+export function isValidIsoDateString(s: string): boolean {
+  if (!ISO_DATE_RE.test(s)) return false;
+  const [y, m, d] = s.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
+}
+
+/** Renders a calendar YYYY-MM-DD value for Portugal (dd/mm/yyyy). */
+export function formatIsoDatePt(iso: string): string {
+  if (!iso || !ISO_DATE_RE.test(iso)) return '';
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Intl.DateTimeFormat('pt-PT', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(y, m - 1, d));
+}
+
 export function computeNights(checkIn: string, checkOut: string): number {
   if (!checkIn || !checkOut) return 0;
   const [y1, m1, d1] = checkIn.split('-').map(Number);

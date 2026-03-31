@@ -1,13 +1,37 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { useData } from '../contexts/DataContext';
-import { Lock, Save, RotateCcw, DollarSign, ArrowLeft, MessageSquare, Tag, Trash2, Sparkles, Loader2, Plus, Globe, Star, AlertTriangle, CalendarDays, Phone, Mail } from 'lucide-react';
-import { ViewType, Review, ReservationSource, ReservationStatus } from '../types';
+import {
+  Lock,
+  Save,
+  RotateCcw,
+  DollarSign,
+  ArrowLeft,
+  MessageSquare,
+  Tag,
+  Trash2,
+  Sparkles,
+  Loader2,
+  Plus,
+  Globe,
+  Star,
+  AlertTriangle,
+  CalendarDays,
+  Phone,
+  Mail,
+  Images,
+  Pencil,
+  X,
+} from 'lucide-react';
+import { ViewType, Review, Reservation, ReservationSource, ReservationStatus } from '../types';
 import { RESERVATION_SOURCE_LABELS } from '../constants';
 import { submitReservationRemote } from '../lib/submitReservationRemote';
 import { GoogleGenAI, Type } from "@google/genai";
 import { authenticate, canManageContent, clearAuthSession, readAuthSession, saveAuthSession, type AdminRole } from '../lib/auth';
-import { computeNights } from '../lib/reservationUtils';
+import { computeNights, formatIsoDatePt, isValidIsoDateString } from '../lib/reservationUtils';
+import { computeSuggestedStayQuote } from '../lib/suitePricing';
+import { AdminPricingCalendar } from './AdminPricingCalendar';
+import { heroSlideshow } from '../images';
 
 interface AdminPanelProps {
   navigateTo: (view: ViewType) => void;
@@ -20,6 +44,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
     reservations,
     bookingDisplayScore,
     updateSuitePrice,
+    updateSuiteImage,
     addReview,
     deleteReview,
     addReservation,
@@ -28,6 +53,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
     setBookingDisplayScore,
     siteContent,
     updateHeroContent,
+    setHeroSlideshowOverride,
+    suitePriceRules,
+    addSuitePriceRule,
+    deleteSuitePriceRule,
     resetData,
   } = useData();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -56,7 +85,25 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
     notes: '',
   });
   const [deletingReservationId, setDeletingReservationId] = useState<string | null>(null);
-  
+
+  type EditResFormShape = {
+    source: ReservationSource;
+    status: ReservationStatus;
+    checkIn: string;
+    checkOut: string;
+    guestName: string;
+    email: string;
+    phone: string;
+    adults: string;
+    children: string;
+    suiteIds: string[];
+    totalPrice: string;
+    externalRef: string;
+    notes: string;
+  };
+  const [editingReservationId, setEditingReservationId] = useState<string | null>(null);
+  const [editResForm, setEditResForm] = useState<EditResFormShape | null>(null);
+
   // AI Import State
   const [importText, setImportText] = useState('');
   const [isImporting, setIsImporting] = useState(false);
@@ -74,6 +121,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!editingReservationId) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setEditingReservationId(null);
+        setEditResForm(null);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [editingReservationId]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (Date.now() < localLockUntil) {
@@ -81,16 +140,36 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
       return;
     }
     setIsLoggingIn(true);
-    const user = await authenticate(username, password);
-    if (user) {
-      saveAuthSession(user);
-      setRole(user.role);
+    const result = await authenticate(username, password);
+    if (result.ok === false) {
+      if (result.reason === 'login_service_unavailable') {
+        setError(
+          'Login indisponível: a API não está a correr. Em local corre `npm run dev:vercel` na raiz (site + /api). `npm run dev` só é o Vite, sem /api. Confirma que `VITE_API_BASE_URL` está vazio no .env em local. No site na Vercel, define ADMIN_USERS_JSON.',
+        );
+      } else if (result.reason === 'login_not_configured') {
+        setError(
+          'Login não configurado: com MySQL, corre `npm run db:seed-admin` (e DATABASE_URL no .env). Alternativa: ADMIN_USERS_JSON no .env. Reinicia `npm run dev:vercel` após alterar o .env.',
+        );
+      } else if (result.reason === 'invalid_credentials' && result.loginHint === 'wrong_password') {
+        setError(
+          'Password incorreta para este utilizador (MySQL admin_users ou ADMIN_USERS_JSON). Corre `npm run db:verify-admin -- admin A_TuaPassword` para testar a base. Atualiza com `npm run db:seed-admin -- admin NovaPassword superadmin`.',
+        );
+      } else if (result.reason === 'invalid_credentials' && result.loginHint === 'unknown_user') {
+        setError(
+          'Utilizador não encontrado na base nem no ADMIN_USERS_JSON. Cria com `npm run db:seed-admin -- admin A_TuaPassword superadmin` ou define ADMIN_USERS_JSON.',
+        );
+      } else {
+        setError(
+          'Credenciais inválidas. Ativa ADMIN_LOGIN_DEBUG=1 no .env e reinicia `npm run dev:vercel`, ou corre `npm run db:verify-admin -- admin A_tua_password`.',
+        );
+      }
+      setLocalLockUntil(Date.now() + 6000);
+    } else {
+      saveAuthSession(result.user, result.token);
+      setRole(result.user.role);
       setIsAuthenticated(true);
       setError('');
       setPassword('');
-    } else {
-      setError('Credenciais inválidas');
-      setLocalLockUntil(Date.now() + 6000);
     }
     setIsLoggingIn(false);
   };
@@ -100,6 +179,29 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
     if (!isNaN(num) && num >= 0) {
       updateSuitePrice(id, num);
     }
+  };
+
+  const heroCarouselUrls = useMemo(
+    () => siteContent.heroSlideshowOverride ?? [...heroSlideshow],
+    [siteContent.heroSlideshowOverride],
+  );
+
+  const patchHeroCarouselUrl = (index: number, value: string) => {
+    const base = siteContent.heroSlideshowOverride ?? [...heroSlideshow];
+    const next = [...base];
+    next[index] = value;
+    setHeroSlideshowOverride(next);
+  };
+
+  const addHeroCarouselSlide = () => {
+    const base = siteContent.heroSlideshowOverride ?? [...heroSlideshow];
+    setHeroSlideshowOverride([...base, '']);
+  };
+
+  const removeHeroCarouselSlide = (index: number) => {
+    const base = siteContent.heroSlideshowOverride ?? [...heroSlideshow];
+    if (base.length <= 1) return;
+    setHeroSlideshowOverride(base.filter((_, i) => i !== index));
   };
 
   const handleDeleteClick = (id: string) => {
@@ -114,6 +216,32 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
       }, 3000);
     }
   };
+
+  const stayPriceSuggestion = useMemo(
+    () =>
+      computeSuggestedStayQuote(
+        resForm.suiteIds,
+        resForm.checkIn,
+        resForm.checkOut,
+        suites,
+        suitePriceRules,
+      ),
+    [resForm.suiteIds, resForm.checkIn, resForm.checkOut, suites, suitePriceRules],
+  );
+
+  const editStaySuggestion = useMemo(
+    () =>
+      editResForm
+        ? computeSuggestedStayQuote(
+            editResForm.suiteIds,
+            editResForm.checkIn,
+            editResForm.checkOut,
+            suites,
+            suitePriceRules,
+          )
+        : null,
+    [editResForm, suites, suitePriceRules],
+  );
 
   const sortedReservations = useMemo(() => {
     const filtered =
@@ -130,6 +258,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
   const handleSubmitManualReservation = (e: React.FormEvent) => {
     e.preventDefault();
     if (!resForm.checkIn || !resForm.checkOut || !resForm.guestName.trim() || resForm.suiteIds.length === 0) return;
+    if (!isValidIsoDateString(resForm.checkIn) || !isValidIsoDateString(resForm.checkOut)) return;
     const nights = computeNights(resForm.checkIn, resForm.checkOut);
     if (nights <= 0) return;
     const adults = parseInt(resForm.adults, 10) || 1;
@@ -174,6 +303,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
     });
   };
 
+  /** Chromium/Edge can leave the native date popover in a bad state; blurring closes it and restores clicks. */
+  const dismissDatePickerAfterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const el = e.target;
+    window.setTimeout(() => el.blur(), 0);
+  };
+
   const handleReservationDeleteClick = (id: string) => {
     if (deletingReservationId === id) {
       deleteReservation(id);
@@ -184,6 +319,66 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
         setDeletingReservationId((prev) => (prev === id ? null : prev));
       }, 3000);
     }
+  };
+
+  const openEditReservation = (r: Reservation) => {
+    setEditingReservationId(r.id);
+    setEditResForm({
+      source: r.source,
+      status: r.status,
+      checkIn: r.checkIn,
+      checkOut: r.checkOut,
+      guestName: r.guestName,
+      email: r.email ?? '',
+      phone: r.phone ?? '',
+      adults: String(r.adults),
+      children: String(r.childrenCount),
+      suiteIds: [...r.suiteIds],
+      totalPrice: r.totalPrice != null ? String(r.totalPrice) : '',
+      externalRef: r.externalRef ?? '',
+      notes: r.notes ?? '',
+    });
+  };
+
+  const handleSaveEditReservation = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editResForm || !editingReservationId) return;
+    if (
+      !editResForm.checkIn ||
+      !editResForm.checkOut ||
+      !editResForm.guestName.trim() ||
+      editResForm.suiteIds.length === 0
+    )
+      return;
+    if (!isValidIsoDateString(editResForm.checkIn) || !isValidIsoDateString(editResForm.checkOut)) return;
+    const nights = computeNights(editResForm.checkIn, editResForm.checkOut);
+    if (nights <= 0) return;
+    const adults = parseInt(editResForm.adults, 10) || 1;
+    const childrenCount = parseInt(editResForm.children, 10) || 0;
+    let total: number | undefined;
+    if (editResForm.totalPrice.trim()) {
+      const t = parseFloat(editResForm.totalPrice.replace(',', '.'));
+      if (!Number.isNaN(t)) total = t;
+    }
+    updateReservation(editingReservationId, {
+      source: editResForm.source,
+      status: editResForm.status,
+      checkIn: editResForm.checkIn,
+      checkOut: editResForm.checkOut,
+      guestName: editResForm.guestName.trim(),
+      email: editResForm.email.trim() || undefined,
+      phone: editResForm.phone.trim() || undefined,
+      adults,
+      childrenCount,
+      suiteIds: [...editResForm.suiteIds],
+      suiteNames: suites.filter((s) => editResForm.suiteIds.includes(s.id)).map((s) => s.name),
+      nights,
+      totalPrice: total,
+      externalRef: editResForm.externalRef.trim() || undefined,
+      notes: editResForm.notes.trim() || undefined,
+    });
+    setEditingReservationId(null);
+    setEditResForm(null);
   };
 
   const handleAiImport = async () => {
@@ -348,7 +543,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
             <div className="flex justify-between items-center mb-4">
                <h2 className="text-xs uppercase tracking-[0.3em] font-black text-charcoal/30">Atualização de Preços por Suite</h2>
                <button 
-                onClick={() => confirm('Restaurar preços padrão?') && resetData()}
+                onClick={() =>
+                  confirm(
+                    'Restaurar preços base das suites ao catálogo original e apagar períodos do calendário sazonal?',
+                  ) && resetData()
+                }
                 className="text-[9px] uppercase tracking-widest font-bold text-red-400 hover:text-red-600 flex items-center gap-2"
               >
                 <RotateCcw className="w-3 h-3" /> Restaurar Originais
@@ -393,6 +592,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
                 ))}
               </div>
             </div>
+            <div className="bg-white p-8 border border-charcoal/5 shadow-xl rounded-sm">
+              <AdminPricingCalendar
+                suites={suites}
+                rules={suitePriceRules}
+                canEdit={canManageContent(role)}
+                onAddRule={addSuitePriceRule}
+                onDeleteRule={deleteSuitePriceRule}
+              />
+            </div>
           </div>
         )}
 
@@ -430,7 +638,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
               </div>
             </div>
 
-            <div className="bg-white rounded-sm shadow-xl border border-charcoal/5 overflow-hidden">
+            <div className="bg-white rounded-sm shadow-xl border border-charcoal/5 overflow-x-hidden overflow-y-visible">
               <div className="px-4 md:px-6 py-3 border-b border-charcoal/5 flex items-center gap-3">
                 <span className="text-[10px] uppercase tracking-widest text-charcoal/40 font-bold">Filtro</span>
                 <select
@@ -451,7 +659,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
                 <div className="col-span-8 md:col-span-3 hidden md:block">Hóspede</div>
                 <div className="col-span-4 md:col-span-2 text-right">Total</div>
                 <div className="col-span-12 md:col-span-2 text-center md:text-left">Estado</div>
-                <div className="col-span-12 md:col-span-1 text-right"></div>
+                <div className="col-span-12 md:col-span-1 text-right">
+                  <span className="hidden md:inline">Ações</span>
+                </div>
               </div>
               <div className="divide-y divide-charcoal/5 max-h-[420px] overflow-y-auto">
                 {sortedReservations.length === 0 ? (
@@ -506,7 +716,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
                             <option value="completed">Concluída</option>
                           </select>
                         </div>
-                        <div className="col-span-4 md:col-span-1 flex justify-end">
+                        <div className="col-span-4 md:col-span-1 flex justify-end gap-1">
+                          {canManageContent(role) && (
+                            <button
+                              type="button"
+                              onClick={() => openEditReservation(r)}
+                              className="p-2 rounded-sm text-charcoal/30 transition-all hover:bg-gold/10 hover:text-gold"
+                              aria-label="Editar reserva"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => handleReservationDeleteClick(r.id)}
@@ -560,25 +780,72 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
                     className="w-full bg-bone border border-charcoal/10 p-3 text-sm focus:border-gold outline-none"
                   />
                 </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">Check-in</label>
-                  <input
-                    type="date"
-                    required
-                    value={resForm.checkIn}
-                    onChange={(e) => setResForm((f) => ({ ...f, checkIn: e.target.value }))}
-                    className="w-full bg-bone border border-charcoal/10 p-3 text-sm focus:border-gold outline-none"
-                  />
+                <div className="relative z-20 [transform:translateZ(0)]">
+                  <label
+                    htmlFor="admin-res-checkin"
+                    className="block text-[10px] uppercase tracking-widest font-bold mb-2"
+                  >
+                    Entrada
+                  </label>
+                  <div className="relative flex min-h-[2.75rem] w-full items-center gap-2 border border-charcoal/10 bg-bone p-3 text-sm focus-within:border-gold outline-none">
+                    <span
+                      className={`pointer-events-none min-w-0 flex-1 tabular-nums ${resForm.checkIn ? 'text-charcoal' : 'text-charcoal/40'}`}
+                      aria-hidden
+                    >
+                      {resForm.checkIn ? formatIsoDatePt(resForm.checkIn) : 'dd/mm/aaaa'}
+                    </span>
+                    <CalendarDays className="pointer-events-none h-4 w-4 shrink-0 text-charcoal/35" aria-hidden />
+                    <input
+                      id="admin-res-checkin"
+                      type="date"
+                      lang="pt-PT"
+                      required
+                      autoComplete="off"
+                      value={resForm.checkIn}
+                      onChange={(e) => {
+                        setResForm((f) => ({ ...f, checkIn: e.target.value }));
+                        dismissDatePickerAfterChange(e);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') (e.currentTarget as HTMLInputElement).blur();
+                      }}
+                      className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">Check-out</label>
-                  <input
-                    type="date"
-                    required
-                    value={resForm.checkOut}
-                    onChange={(e) => setResForm((f) => ({ ...f, checkOut: e.target.value }))}
-                    className="w-full bg-bone border border-charcoal/10 p-3 text-sm focus:border-gold outline-none"
-                  />
+                <div className="relative z-20 [transform:translateZ(0)]">
+                  <label
+                    htmlFor="admin-res-checkout"
+                    className="block text-[10px] uppercase tracking-widest font-bold mb-2"
+                  >
+                    Saída
+                  </label>
+                  <div className="relative flex min-h-[2.75rem] w-full items-center gap-2 border border-charcoal/10 bg-bone p-3 text-sm focus-within:border-gold outline-none">
+                    <span
+                      className={`pointer-events-none min-w-0 flex-1 tabular-nums ${resForm.checkOut ? 'text-charcoal' : 'text-charcoal/40'}`}
+                      aria-hidden
+                    >
+                      {resForm.checkOut ? formatIsoDatePt(resForm.checkOut) : 'dd/mm/aaaa'}
+                    </span>
+                    <CalendarDays className="pointer-events-none h-4 w-4 shrink-0 text-charcoal/35" aria-hidden />
+                    <input
+                      id="admin-res-checkout"
+                      type="date"
+                      lang="pt-PT"
+                      required
+                      autoComplete="off"
+                      min={resForm.checkIn || undefined}
+                      value={resForm.checkOut}
+                      onChange={(e) => {
+                        setResForm((f) => ({ ...f, checkOut: e.target.value }));
+                        dismissDatePickerAfterChange(e);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') (e.currentTarget as HTMLInputElement).blur();
+                      }}
+                      className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">Nome do hóspede</label>
@@ -626,6 +893,32 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
                     className="w-full bg-bone border border-charcoal/10 p-3 text-sm focus:border-gold outline-none"
                   />
                 </div>
+                <div className="lg:col-span-3">
+                  <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">Suites</label>
+                  <div className="flex flex-wrap gap-3">
+                    {suites.map((s) => {
+                      const on = resForm.suiteIds.includes(s.id);
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() =>
+                            setResForm((f) => ({
+                              ...f,
+                              suiteIds: on ? f.suiteIds.filter((id) => id !== s.id) : [...f.suiteIds, s.id],
+                            }))
+                          }
+                          className={`text-[10px] uppercase tracking-widest font-bold px-4 py-2 border rounded-sm transition-colors ${
+                            on ? 'bg-gold text-white border-gold' : 'border-charcoal/10 text-charcoal/50 hover:border-gold/40'
+                          }`}
+                        >
+                          {s.name}
+                          <span className="ml-1 font-normal opacity-80">(€{s.price}/noite base)</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
                 <div>
                   <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">Total (€)</label>
                   <input
@@ -636,31 +929,39 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">Suites</label>
-                <div className="flex flex-wrap gap-3">
-                  {suites.map((s) => {
-                    const on = resForm.suiteIds.includes(s.id);
-                    return (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() =>
-                          setResForm((f) => ({
-                            ...f,
-                            suiteIds: on ? f.suiteIds.filter((id) => id !== s.id) : [...f.suiteIds, s.id],
-                          }))
-                        }
-                        className={`text-[10px] uppercase tracking-widest font-bold px-4 py-2 border rounded-sm transition-colors ${
-                          on ? 'bg-gold text-white border-gold' : 'border-charcoal/10 text-charcoal/50 hover:border-gold/40'
-                        }`}
-                      >
-                        {s.name}
-                      </button>
-                    );
-                  })}
+              {stayPriceSuggestion && (
+                <div className="space-y-3 rounded-sm border border-gold/25 bg-gold/5 p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gold">Sugestão de total</p>
+                  <p className="text-sm text-charcoal">
+                    Com as suites e datas indicadas (tarifas base +{' '}
+                    <strong className="font-normal">calendário sazonal</strong> em Tarifas):{' '}
+                    <strong className="font-serif text-xl text-charcoal">
+                      €{stayPriceSuggestion.total.toFixed(2)}
+                    </strong>
+                    <span className="text-charcoal/45">
+                      {' '}
+                      · {stayPriceSuggestion.nights}{' '}
+                      {stayPriceSuggestion.nights === 1 ? 'noite' : 'noites'}
+                    </span>
+                  </p>
+                  <ul className="space-y-1 border-t border-gold/10 pt-2 text-xs text-charcoal/60">
+                    {stayPriceSuggestion.lines.map((ln) => (
+                      <li key={ln.suiteId}>
+                        <span className="font-medium text-charcoal">{ln.name}</span>: €{ln.subtotal.toFixed(2)}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setResForm((f) => ({ ...f, totalPrice: stayPriceSuggestion.total.toFixed(2) }))
+                    }
+                    className="border border-charcoal/20 bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-charcoal hover:border-gold/50"
+                  >
+                    Usar sugestão no total
+                  </button>
                 </div>
-              </div>
+              )}
               <div>
                 <label className="block text-[10px] uppercase tracking-widest font-bold mb-2">Notas internas</label>
                 <textarea
@@ -678,6 +979,299 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
                 Adicionar reserva
               </button>
             </form>
+
+            {editingReservationId && editResForm && (
+              <div
+                className="fixed inset-0 z-[100] flex items-center justify-center bg-charcoal/60 p-4 backdrop-blur-[2px]"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="edit-reservation-title"
+                onClick={() => {
+                  setEditingReservationId(null);
+                  setEditResForm(null);
+                }}
+              >
+                <div
+                  className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-sm border border-charcoal/10 bg-bone p-6 shadow-2xl md:p-8"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="mb-6 flex items-start justify-between gap-4">
+                    <h2 id="edit-reservation-title" className="font-serif text-2xl text-charcoal">
+                      Editar reserva
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingReservationId(null);
+                        setEditResForm(null);
+                      }}
+                      className="rounded-sm p-2 text-charcoal/40 transition-colors hover:bg-charcoal/5 hover:text-charcoal"
+                      aria-label="Fechar"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <form onSubmit={handleSaveEditReservation} className="space-y-6">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      <div>
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest">Origem</label>
+                        <select
+                          value={editResForm.source}
+                          onChange={(e) =>
+                            setEditResForm((f) =>
+                              f ? { ...f, source: e.target.value as ReservationSource } : f,
+                            )
+                          }
+                          className="w-full border border-charcoal/10 bg-white p-3 text-sm outline-none focus:border-gold"
+                        >
+                          {(Object.keys(RESERVATION_SOURCE_LABELS) as ReservationSource[]).map((k) => (
+                            <option key={k} value={k}>
+                              {RESERVATION_SOURCE_LABELS[k]}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest">Estado</label>
+                        <select
+                          value={editResForm.status}
+                          onChange={(e) =>
+                            setEditResForm((f) =>
+                              f ? { ...f, status: e.target.value as ReservationStatus } : f,
+                            )
+                          }
+                          className="w-full border border-charcoal/10 bg-white p-3 text-sm outline-none focus:border-gold"
+                        >
+                          <option value="pending">Pendente</option>
+                          <option value="confirmed">Confirmada</option>
+                          <option value="cancelled">Cancelada</option>
+                          <option value="completed">Concluída</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest">
+                          Ref. externa (opcional)
+                        </label>
+                        <input
+                          value={editResForm.externalRef}
+                          onChange={(e) =>
+                            setEditResForm((f) => (f ? { ...f, externalRef: e.target.value } : f))
+                          }
+                          className="w-full border border-charcoal/10 bg-white p-3 text-sm outline-none focus:border-gold"
+                        />
+                      </div>
+                      <div className="relative z-[110]">
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest">Entrada</label>
+                        <div className="relative flex min-h-[2.75rem] w-full items-center gap-2 border border-charcoal/10 bg-white p-3 text-sm focus-within:border-gold">
+                          <span
+                            className={`pointer-events-none min-w-0 flex-1 tabular-nums ${editResForm.checkIn ? 'text-charcoal' : 'text-charcoal/40'}`}
+                            aria-hidden
+                          >
+                            {editResForm.checkIn ? formatIsoDatePt(editResForm.checkIn) : 'dd/mm/aaaa'}
+                          </span>
+                          <CalendarDays className="pointer-events-none h-4 w-4 shrink-0 text-charcoal/35" aria-hidden />
+                          <input
+                            type="date"
+                            lang="pt-PT"
+                            required
+                            autoComplete="off"
+                            value={editResForm.checkIn}
+                            onChange={(e) => {
+                              setEditResForm((f) => (f ? { ...f, checkIn: e.target.value } : f));
+                              dismissDatePickerAfterChange(e);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Escape') (e.currentTarget as HTMLInputElement).blur();
+                            }}
+                            className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                          />
+                        </div>
+                      </div>
+                      <div className="relative z-[110]">
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest">Saída</label>
+                        <div className="relative flex min-h-[2.75rem] w-full items-center gap-2 border border-charcoal/10 bg-white p-3 text-sm focus-within:border-gold">
+                          <span
+                            className={`pointer-events-none min-w-0 flex-1 tabular-nums ${editResForm.checkOut ? 'text-charcoal' : 'text-charcoal/40'}`}
+                            aria-hidden
+                          >
+                            {editResForm.checkOut ? formatIsoDatePt(editResForm.checkOut) : 'dd/mm/aaaa'}
+                          </span>
+                          <CalendarDays className="pointer-events-none h-4 w-4 shrink-0 text-charcoal/35" aria-hidden />
+                          <input
+                            type="date"
+                            lang="pt-PT"
+                            required
+                            autoComplete="off"
+                            min={editResForm.checkIn || undefined}
+                            value={editResForm.checkOut}
+                            onChange={(e) => {
+                              setEditResForm((f) => (f ? { ...f, checkOut: e.target.value } : f));
+                              dismissDatePickerAfterChange(e);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Escape') (e.currentTarget as HTMLInputElement).blur();
+                            }}
+                            className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest">
+                          Nome do hóspede
+                        </label>
+                        <input
+                          required
+                          value={editResForm.guestName}
+                          onChange={(e) =>
+                            setEditResForm((f) => (f ? { ...f, guestName: e.target.value } : f))
+                          }
+                          className="w-full border border-charcoal/10 bg-white p-3 text-sm outline-none focus:border-gold"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest">E-mail</label>
+                        <input
+                          type="email"
+                          value={editResForm.email}
+                          onChange={(e) =>
+                            setEditResForm((f) => (f ? { ...f, email: e.target.value } : f))
+                          }
+                          className="w-full border border-charcoal/10 bg-white p-3 text-sm outline-none focus:border-gold"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest">Telefone</label>
+                        <input
+                          value={editResForm.phone}
+                          onChange={(e) =>
+                            setEditResForm((f) => (f ? { ...f, phone: e.target.value } : f))
+                          }
+                          className="w-full border border-charcoal/10 bg-white p-3 text-sm outline-none focus:border-gold"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest">Adultos</label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={editResForm.adults}
+                          onChange={(e) =>
+                            setEditResForm((f) => (f ? { ...f, adults: e.target.value } : f))
+                          }
+                          className="w-full border border-charcoal/10 bg-white p-3 text-sm outline-none focus:border-gold"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest">Crianças</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={editResForm.children}
+                          onChange={(e) =>
+                            setEditResForm((f) => (f ? { ...f, children: e.target.value } : f))
+                          }
+                          className="w-full border border-charcoal/10 bg-white p-3 text-sm outline-none focus:border-gold"
+                        />
+                      </div>
+                      <div className="lg:col-span-3">
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest">Suites</label>
+                        <div className="flex flex-wrap gap-2">
+                          {suites.map((s) => {
+                            const on = editResForm.suiteIds.includes(s.id);
+                            return (
+                              <button
+                                key={s.id}
+                                type="button"
+                                onClick={() =>
+                                  setEditResForm((f) => {
+                                    if (!f) return f;
+                                    return {
+                                      ...f,
+                                      suiteIds: on
+                                        ? f.suiteIds.filter((id) => id !== s.id)
+                                        : [...f.suiteIds, s.id],
+                                    };
+                                  })
+                                }
+                                className={`rounded-sm border px-3 py-2 text-[10px] font-bold uppercase tracking-widest ${
+                                  on
+                                    ? 'border-gold bg-gold text-white'
+                                    : 'border-charcoal/10 text-charcoal/50 hover:border-gold/40'
+                                }`}
+                              >
+                                {s.name}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest">Total (€)</label>
+                        <input
+                          value={editResForm.totalPrice}
+                          onChange={(e) =>
+                            setEditResForm((f) => (f ? { ...f, totalPrice: e.target.value } : f))
+                          }
+                          placeholder="Opcional"
+                          className="w-full border border-charcoal/10 bg-white p-3 text-sm outline-none focus:border-gold"
+                        />
+                      </div>
+                    </div>
+                    {editStaySuggestion && (
+                      <div className="space-y-2 rounded-sm border border-gold/25 bg-gold/5 p-3 text-sm">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-gold">Sugestão de total</p>
+                        <p className="text-charcoal">
+                          €{editStaySuggestion.total.toFixed(2)} · {editStaySuggestion.nights}{' '}
+                          {editStaySuggestion.nights === 1 ? 'noite' : 'noites'}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setEditResForm((f) =>
+                              f && editStaySuggestion
+                                ? { ...f, totalPrice: editStaySuggestion.total.toFixed(2) }
+                                : f,
+                            )
+                          }
+                          className="text-[10px] font-bold uppercase tracking-widest text-gold hover:underline"
+                        >
+                          Usar sugestão no total
+                        </button>
+                      </div>
+                    )}
+                    <div>
+                      <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest">Notas internas</label>
+                      <textarea
+                        value={editResForm.notes}
+                        onChange={(e) =>
+                          setEditResForm((f) => (f ? { ...f, notes: e.target.value } : f))
+                        }
+                        rows={3}
+                        className="w-full resize-none border border-charcoal/10 bg-white p-3 text-sm outline-none focus:border-gold"
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="submit"
+                        className="bg-charcoal px-8 py-3 text-[10px] font-black uppercase tracking-[0.3em] text-white hover:bg-gold"
+                      >
+                        Guardar alterações
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingReservationId(null);
+                          setEditResForm(null);
+                        }}
+                        className="border border-charcoal/15 px-8 py-3 text-[10px] font-bold uppercase tracking-widest text-charcoal/60 hover:border-gold/40"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -774,7 +1368,96 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
                 <p className="text-sm text-charcoal/60">Este perfil pode visualizar reservas, mas não editar conteúdo.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <div className="bg-white p-8 border border-charcoal/5 shadow-xl rounded-sm space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <Images className="w-5 h-5 text-gold" />
+                      <div>
+                        <h3 className="font-serif text-2xl">Carrossel da página inicial</h3>
+                        <p className="text-sm text-charcoal/50 mt-1">
+                          URLs das imagens em fundo (rotação automática). Use links https ou ficheiros em{' '}
+                          <code className="text-[11px] bg-bone px-1">/public</code>.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={addHeroCarouselSlide}
+                        className="inline-flex items-center gap-2 px-4 py-2 text-[10px] uppercase tracking-widest font-bold border border-charcoal/10 rounded-sm hover:border-gold/40"
+                      >
+                        <Plus className="w-3 h-3" /> Diapositivo
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm('Repôr o carrossel às imagens originais do site?')) {
+                            setHeroSlideshowOverride(null);
+                          }
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2 text-[10px] uppercase tracking-widest font-bold text-charcoal/50 hover:text-gold"
+                      >
+                        <RotateCcw className="w-3 h-3" /> Predefinição
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {heroCarouselUrls.map((url, index) => (
+                      <div key={`slide-${index}`} className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                        <span className="text-[10px] uppercase tracking-widest text-charcoal/40 font-bold w-8 shrink-0">
+                          {index + 1}
+                        </span>
+                        <input
+                          value={url}
+                          onChange={(e) => patchHeroCarouselUrl(index, e.target.value)}
+                          placeholder="https://…"
+                          className="flex-1 bg-bone border border-charcoal/10 p-3 text-sm focus:border-gold outline-none font-mono text-[13px]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeHeroCarouselSlide(index)}
+                          disabled={heroCarouselUrls.length <= 1}
+                          className="shrink-0 p-3 border border-charcoal/10 rounded-sm text-charcoal/30 hover:text-red-500 hover:border-red-200 disabled:opacity-30 disabled:pointer-events-none"
+                          aria-label="Remover diapositivo"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white p-8 border border-charcoal/5 shadow-xl rounded-sm space-y-6">
+                  <h3 className="font-serif text-2xl">Imagens das suites</h3>
+                  <p className="text-sm text-charcoal/50">
+                    Cartões na página inicial e Suites, e seleção na reserva. Cole o URL completo da imagem.
+                  </p>
+                  <div className="grid grid-cols-1 gap-6">
+                    {suites.map((suite) => (
+                      <div
+                        key={suite.id}
+                        className="flex flex-col md:flex-row gap-4 md:items-center border border-charcoal/5 p-4 rounded-sm"
+                      >
+                        <img
+                          src={suite.image}
+                          alt=""
+                          className="w-full md:w-28 h-40 md:h-20 object-cover rounded-sm bg-charcoal/5"
+                        />
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <p className="font-serif text-lg">{suite.name}</p>
+                          <input
+                            value={suite.image}
+                            onChange={(e) => updateSuiteImage(suite.id, e.target.value)}
+                            className="w-full bg-bone border border-charcoal/10 p-3 text-sm focus:border-gold outline-none font-mono text-[13px]"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {(['pt', 'en'] as const).map((locale) => (
                   <div key={locale} className="bg-white p-8 border border-charcoal/5 shadow-xl rounded-sm space-y-4">
                     <h3 className="font-serif text-2xl">Hero ({locale.toUpperCase()})</h3>
@@ -823,6 +1506,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ navigateTo }) => {
                     </div>
                   </div>
                 ))}
+                </div>
               </div>
             )}
           </div>

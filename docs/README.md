@@ -4,10 +4,10 @@ This folder is the human-friendly source of truth for business, operations, and 
 
 ## Structure
 
-- `docs/prompts/` - reusable execution prompts and ticket packs.
+- `docs/prompts/` - reusable execution prompts and ticket packs (MySQL migration: `mysql-migration-ticket-pack.md`).
 - `docs/sales/` - proposals, pricing notes, and client message templates.
 - `docs/ops/` - environment setup, deployment notes, and security decisions.
-- `docs/runbooks/` - step-by-step procedures for common tasks.
+- `docs/runbooks/` - step-by-step procedures; **`session-handoff.md`** = resume context for new chats (dev commands, MySQL, admin login).
 - `docs/ops/images-and-local-seo.md` - image optimization and local discovery guidance.
 
 ## Editing Rules

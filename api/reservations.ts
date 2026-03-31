@@ -1,27 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { isDatabaseConfigured } from './lib/db.js';
+import { insertReservationMysql, type ReservationPayload } from './lib/reservationsMysql.js';
 
-type Payload = {
-  id: string;
-  source: string;
-  status: string;
-  checkIn: string;
-  checkOut: string;
-  guestName: string;
-  email?: string;
-  phone?: string;
-  adults: number;
-  childrenCount: number;
-  suiteIds: string[];
-  suiteNames: string[];
-  nights: number;
-  totalPrice?: number;
-  nif?: string;
-  notes?: string;
-  externalRef?: string;
-  createdAt: string;
-};
+type Payload = ReservationPayload;
 
 function isValidPayload(b: unknown): b is Payload {
   if (!b || typeof b !== 'object') return false;
@@ -79,13 +62,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const fromEmail =
     process.env.RESEND_FROM_EMAIL || 'Palacium Reservas <onboarding@resend.dev>';
 
-  const dbConfigured = !!(supabaseUrl && supabaseKey);
+  const mysqlConfigured = isDatabaseConfigured();
+  const supabaseConfigured = !!(supabaseUrl && supabaseKey);
   const emailConfigured = !!(resendKey && notifyTo);
 
-  if (!dbConfigured && !emailConfigured) {
+  if (!mysqlConfigured && !supabaseConfigured && !emailConfigured) {
     res.status(503).json({
       ok: false,
-      error: 'Configura SUPABASE_* e/ou RESEND_API_KEY + NOTIFY_EMAIL.',
+      error:
+        'Configura DATABASE_URL (MySQL), SUPABASE_* e/ou RESEND_API_KEY + NOTIFY_EMAIL.',
       stored: false,
       emailed: false,
     });
@@ -95,7 +80,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let stored = false;
   let emailed = false;
 
-  if (dbConfigured) {
+  if (mysqlConfigured) {
+    try {
+      stored = await insertReservationMysql(body);
+    } catch (e) {
+      console.error('[reservations] MySQL:', e);
+    }
+  }
+
+  if (!stored && supabaseConfigured && supabaseUrl && supabaseKey) {
     try {
       const supabase = createClient(supabaseUrl, supabaseKey);
       const { error } = await supabase.from('reservations').insert({
