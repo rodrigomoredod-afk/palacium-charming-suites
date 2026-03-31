@@ -5,7 +5,7 @@
 
 /** Palacium logo (SVG, transparent). File must be shared: “Anyone with the link can view”. */
 export const logoImageUrl: string | null =
-  '/assets/images/logo/Logo.svg';
+  '/logo.svg';
 
 /** Hero background slideshow (home) */
 export const heroSlideshow = [
