@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
-import { isDatabaseConfigured } from './lib/db.js';
-import { insertReservationMysql, type ReservationPayload } from './lib/reservationsMysql.js';
+import { isDatabaseConfigured } from './_lib/db.js';
+import { insertReservationMysql, type ReservationPayload } from './_lib/reservationsMysql.js';
 
 type Payload = ReservationPayload;
 

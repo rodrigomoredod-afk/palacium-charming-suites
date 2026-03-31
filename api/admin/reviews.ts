@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { requireAdminWriteAuth } from '../lib/adminApiAuth.js';
-import { parseJsonBody } from '../lib/parseJsonBody.js';
-import { deleteReviewRow, insertReviewRow } from '../lib/siteDataRepository.js';
+import { requireAdminWriteAuth } from '../_lib/adminApiAuth.js';
+import { parseJsonBody } from '../_lib/parseJsonBody.js';
+import { deleteReviewRow, insertReviewRow } from '../_lib/siteDataRepository.js';
 import type { Review } from '../../types.js';
 
 function isReviewBody(b: unknown): b is Review {

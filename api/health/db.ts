@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { isDatabaseConfigured, pingMysql } from '../lib/db.js';
+import { isDatabaseConfigured, pingMysql } from '../_lib/db.js';
 
 /**
  * GET /api/health/db — verifies MySQL connectivity (SELECT 1).

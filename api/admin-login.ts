@@ -7,9 +7,9 @@ import {
   adminUsernameExistsInDb,
   hasAnyAdminUser,
   type AdminRole,
-} from './lib/adminDbAuth.js';
-import { signAdminSessionToken } from './lib/sessionJwt.js';
-import { isDatabaseConfigured } from './lib/db.js';
+} from './_lib/adminDbAuth.js';
+import { signAdminSessionToken } from './_lib/sessionJwt.js';
+import { isDatabaseConfigured } from './_lib/db.js';
 
 function findProjectRoot(startDir: string): string | undefined {
   let dir = path.resolve(startDir);

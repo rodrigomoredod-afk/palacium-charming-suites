@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { requireAdminWriteAuth } from '../lib/adminApiAuth.js';
-import { parseJsonBody } from '../lib/parseJsonBody.js';
-import { getSuiteDefaultOrThrow, upsertSuiteRow } from '../lib/siteDataRepository.js';
+import { requireAdminWriteAuth } from '../_lib/adminApiAuth.js';
+import { parseJsonBody } from '../_lib/parseJsonBody.js';
+import { getSuiteDefaultOrThrow, upsertSuiteRow } from '../_lib/siteDataRepository.js';
 import type { Suite } from '../../types.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

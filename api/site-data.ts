@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { isDatabaseConfigured } from './lib/db.js';
-import { loadMergedSiteData } from './lib/siteDataRepository.js';
+import { isDatabaseConfigured } from './_lib/db.js';
+import { loadMergedSiteData } from './_lib/siteDataRepository.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {

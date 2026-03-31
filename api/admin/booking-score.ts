@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { requireAdminWriteAuth } from '../lib/adminApiAuth.js';
-import { parseJsonBody } from '../lib/parseJsonBody.js';
-import { saveBookingDisplayScore } from '../lib/siteDataRepository.js';
+import { requireAdminWriteAuth } from '../_lib/adminApiAuth.js';
+import { parseJsonBody } from '../_lib/parseJsonBody.js';
+import { saveBookingDisplayScore } from '../_lib/siteDataRepository.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'PUT') {

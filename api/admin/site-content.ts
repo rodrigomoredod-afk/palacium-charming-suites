@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { requireAdminWriteAuth } from '../lib/adminApiAuth.js';
-import { parseJsonBody } from '../lib/parseJsonBody.js';
-import { loadMergedSiteData, saveSiteContentRow } from '../lib/siteDataRepository.js';
+import { requireAdminWriteAuth } from '../_lib/adminApiAuth.js';
+import { parseJsonBody } from '../_lib/parseJsonBody.js';
+import { loadMergedSiteData, saveSiteContentRow } from '../_lib/siteDataRepository.js';
 import type { HeroContent, SiteContent } from '../../types.js';
 
 type HeroPatch = {
