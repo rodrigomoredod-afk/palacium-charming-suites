@@ -1,6 +1,12 @@
 # Session Handoff
 
-Last updated: 2026-03-31 — Admin tarifário sazonal, sugestão de totais, editar reservas
+Last updated: 2026-04-01 — Laptop/Vercel access runbook; deploy fixes (logo, api/_lib)
+
+## Laptop, Vercel & Área Reservada
+
+- **Second machine / laptop:** clone repo, `npm install`, copy `.env` from `.env.example` and fill secrets locally (never commit `.env`). See **`docs/runbooks/laptop-and-vercel-access.md`**.
+- **Live site on any device:** same **Vercel** project = same URL and same env (`ADMIN_USERS_JSON`, optional `DATABASE_URL`). No separate “laptop Vercel config” for production — you only configure Vercel once.
+- **Local Área Reservada:** `npm run dev:vercel` + local `.env` with `ADMIN_USERS_JSON` (and optional MySQL). If `DATABASE_URL` points at localhost but Docker is off, comment it out or use JSON-only login.
 
 ## Latest Sync Status
 
@@ -20,6 +26,7 @@ Last updated: 2026-03-31 — Admin tarifário sazonal, sugestão de totais, edit
   - Datas manual: **Entrada/Saída** com display **pt-PT** (dd/mm/yyyy) + input nativo invisível; blur após pick para evitar bloqueio no Chrome/Edge.
 - **Auth / API:** inalterado face à ronda anterior — ver bullets anteriores em git para `admin-login`, `SESSION_SECRET`, etc.
 - **Local tooling:** **`scripts/diagnose-env.cmd`**, **`npm run db:verify-admin`**. **Visual QA:** **`docs/runbooks/visual-qa-pt-en-checklist.md`**.
+- **Deploy / assets:** Logo served from **`public/logo.svg`**; API helpers under **`api/_lib/`** (Vercel Hobby 12-function limit).
 
 ## Current Project Phase
 
@@ -58,6 +65,7 @@ Last updated: 2026-03-31 — Admin tarifário sazonal, sugestão de totais, edit
 
 ```
 Continue from docs/runbooks/session-handoff.md (and mysql-migration-ticket-pack.md if backend).
+Laptop/new PC: docs/runbooks/laptop-and-vercel-access.md — clone, .env from .env.example, never commit .env; Vercel env is shared for production on all devices.
 Dev: npm run dev:vercel for /api; npm run dev is Vite-only.
 Admin: Tarifas → calendário sazonal (bulk suites); Reservas → sugestão total + modal Editar.
 Data: palacium_suite_price_rules_v1 in localStorage; site data API still VITE_ENABLE_SITE_DATA_API + SESSION_SECRET for MySQL writes.
